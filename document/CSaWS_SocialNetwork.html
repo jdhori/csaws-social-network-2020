@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src data:; style-src &#x27;unsafe-inline&#x27;; font-src data:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
+<meta name="author" content="California Firearm Violence Research Center, UC Davis Health">
+<meta name="description" content="Accessible (WCAG 2.1 AA) digital edition of the UC Davis California Firearm Violence Research Center research brief summarizing the 2020 California Safety and Wellbeing Survey findings on anticipatory concerns about violence within social networks.">
+<meta name="keywords" content="CSaWS, California Safety and Wellbeing Survey, violence prevention, firearm violence, self-directed violence, social networks, UC Davis, public health, accessibility">
+<title>Concerns About Violence Within Social Networks - CSaWS 2020 (accessible edition)</title>
+<style>
+:root{
+  color-scheme: light;
+  --ink:#1a1f29; --muted:#3d4554; --line:#c9ced9;
+  --bg:#ffffff; --panel:#f4f6fb; --brand:#0b2f55; --accent:#1f6fb2;
+  --green:#3f6f24; --focus:#b8002e;
+  --space:1.25rem; --maxw:60rem;
+}
+*{box-sizing:border-box}
+html{font-size:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.55;}
+.skip{position:absolute;left:-999px;top:0;background:var(--brand);color:#fff;
+  padding:.6rem 1rem;z-index:10;border-radius:0 0 .4rem 0}
+.skip:focus{left:0}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--space)}
+a{color:#0a4f8a}
+a:focus-visible, summary:focus-visible, th a:focus-visible{
+  outline:3px solid var(--focus);outline-offset:2px}
+header.brief{background:var(--brand);color:#fff;padding:1.6rem 0}
+header.brief h1{margin:0 0 .25rem;font-size:clamp(1.5rem,1rem+2.4vw,2.3rem);line-height:1.15}
+header.brief p{margin:.15rem 0;color:#d7e3f1}
+main{padding:1.5rem 0 2.5rem}
+h2{font-size:clamp(1.25rem,1rem+1.2vw,1.6rem);color:var(--brand);
+  border-bottom:3px solid var(--accent);padding-bottom:.25rem;margin:2rem 0 .75rem}
+h3{font-size:1.1rem;color:var(--muted);margin:1.25rem 0 .4rem}
+.lead{font-size:1.15rem;background:var(--panel);border-left:5px solid var(--accent);
+  padding:1rem 1.2rem;border-radius:.3rem}
+.headline{font-size:1.3rem}
+.headline .big{font-size:2.4rem;font-weight:800;color:var(--accent);
+  display:inline-block;margin-right:.4rem}
+table.data{border-collapse:collapse;width:100%;margin:.5rem 0 0;font-size:.97rem}
+table.data caption{text-align:left;font-weight:700;color:var(--brand);
+  padding:.35rem 0;font-size:1.02rem}
+table.data th,table.data td{border:1px solid var(--line);padding:.45rem .6rem;text-align:left}
+table.data thead th{background:var(--brand);color:#fff;border-color:var(--brand)}
+table.data tbody th{background:var(--panel);font-weight:600}
+table.data td{text-align:left}
+.reasons td{text-transform:capitalize}
+figure.chart{margin:1rem 0;background:#fff;border:1px solid var(--line);
+  border-radius:.5rem;padding:1rem 1.1rem}
+figure.chart figcaption{font-weight:700;color:var(--brand);margin-bottom:.6rem}
+.chart-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);
+  gap:1.2rem;align-items:start}
+.chart-vis{text-align:center}
+.pie{max-width:100%;height:auto}
+ul.legend{list-style:none;margin:.6rem 0 0;padding:0;text-align:left;
+  display:grid;gap:.2rem;font-size:.9rem}
+ul.legend .swatch{display:inline-block;width:.85rem;height:.85rem;border-radius:2px;
+  margin-right:.45rem;vertical-align:middle;border:1px solid rgba(0,0,0,.25)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+  gap:1rem;margin:.75rem 0}
+.stat{background:var(--panel);border-radius:.5rem;padding:1.1rem;text-align:center}
+.stat .stat-num{font-weight:800;color:var(--accent);font-size:1.2rem}
+.donut-wrap{position:relative;width:160px;height:160px;margin:0 auto .5rem}
+/* Own solid background so axe-core computes contrast directly (no SVG-overlap
+   heuristic). Sits inside the ring's hole; ink-on-white = ~16:1. */
+.donut-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:7rem;height:7rem;border-radius:50%;background:#fff;display:grid;
+  place-items:center;font-size:1.7rem;font-weight:800;color:var(--ink)}
+.note{font-size:.88rem;color:var(--muted);margin:.5rem 0 0}
+blockquote.fnbox{margin:1rem 0;background:var(--panel);border-left:4px solid var(--line);
+  padding:.6rem 1rem;font-size:.9rem;color:var(--muted);border-radius:.3rem}
+ul.takeaways, ul.likely{padding-left:1.2rem}
+ul.takeaways li, ul.likely li{margin:.4rem 0}
+.methodology{background:var(--panel);border-radius:.5rem;padding:1rem 1.2rem}
+.editor{border:2px solid var(--accent);border-radius:.5rem;padding:1rem 1.2rem;
+  background:#eef4fb;margin-top:2rem}
+.editor h2{border:0;margin-top:0}
+.crisis{font-weight:700;background:#fff3f4;border:1px solid #e3b6bd;border-radius:.4rem;
+  padding:.7rem .9rem;margin-top:.6rem}
+footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted);
+  font-size:.88rem}
+@media (max-width:640px){
+  .chart-row{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+@media print{
+  @page{size:letter;margin:18mm 16mm;
+    @top-center{content:"Concerns About Violence Within Social Networks - CSaWS 2020";
+      font-size:8pt;color:#555}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);
+      font-size:8pt;color:#555}}
+  body{font-size:10.5pt}
+  .skip{display:none}
+  header.brief{background:#0b2f55!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table.data thead th, table.data tbody th, .stat, .methodology, .lead,
+  figure.chart, .editor, .crisis{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  h2{string-set:section content();bookmark-level:1;bookmark-label:content()}
+  h3{bookmark-level:2;bookmark-label:content()}
+  /* Keep each data table whole and bound to its caption. A table that splits
+     across a page break crashes WeasyPrint's PDF/UA tagger
+     ("Table wrapper without a table"); the caption break-after is required. */
+  table.data{break-inside:avoid}
+  table.data caption{break-after:avoid}
+  figure.chart, .stat{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="brief"><div class="wrap">
+<h1>Concerns About Violence Within Social Networks</h1>
+<p>Results from the 2020 California Safety and Wellbeing Survey (CSaWS)</p>
+<p>California Firearm Violence Research Center, UC Davis Health &middot; January 2023</p>
+</div></header>
+<main id="main"><div class="wrap">
+
+<section aria-labelledby="q-h"><h2 id="q-h">The question we asked</h2>
+<p class="lead">We asked California adults, &quot;Are you concerned that anyone you know might physically hurt [another person/themselves] on purpose?&quot;</p></section>
+<section aria-labelledby="key-h"><h2 id="key-h">Key finding</h2>
+<p class="headline"><span class="big">1 in 5</span>respondents (22%) reported knowing someone at perceived risk of hurting others or themselves.</p></section>
+<section aria-labelledby="other-h"><h2 id="other-h">Persons at perceived risk of other-directed violence</h2>
+<p>They were described as follows. Highlights: 32% friends; 74% male; 26% are 40-49 years old.</p>
+<h3>Relationship to the respondent</h3>
+<figure class="chart"><figcaption>Relationship of the person at perceived risk to the respondent</figcaption><div class="chart-row"><div class="chart-vis"><svg viewBox="0 0 220 220" width="220" height="220" role="presentation" aria-hidden="true" focusable="false" class="pie"><path d="M110.00,110.00 L110.00,2.00 A108.00,108.00 0 0 1 205.75,159.95 Z" fill="#0b3d66"/><path d="M110.00,110.00 L205.75,159.95 A108.00,108.00 0 0 1 57.00,204.10 Z" fill="#1f6fb2"/><path d="M110.00,110.00 L57.00,204.10 A108.00,108.00 0 0 1 8.65,72.70 Z" fill="#3a9bd9"/><path d="M110.00,110.00 L8.65,72.70 A108.00,108.00 0 0 1 34.87,32.42 Z" fill="#7fc3e8"/><path d="M110.00,110.00 L34.87,32.42 A108.00,108.00 0 0 1 69.47,9.89 Z" fill="#173a5e"/><path d="M110.00,110.00 L69.47,9.89 A108.00,108.00 0 0 1 110.00,2.00 Z" fill="#5aa9d6"/></svg><ul class="legend"><li><span class="swatch" style="background:#0b3d66" aria-hidden="true"></span>Friend</li><li><span class="swatch" style="background:#1f6fb2" aria-hidden="true"></span>Neighbor, coworker, or other</li><li><span class="swatch" style="background:#3a9bd9" aria-hidden="true"></span>Other close family member</li><li><span class="swatch" style="background:#7fc3e8" aria-hidden="true"></span>Spouse or intimate partner</li><li><span class="swatch" style="background:#173a5e" aria-hidden="true"></span>Parent or stepparent</li><li><span class="swatch" style="background:#5aa9d6" aria-hidden="true"></span>Child or stepchild</li></ul></div><div class="chart-data"><table class="data"><caption>Relationship (other-directed violence)</caption><thead><tr><th scope="col">Category</th><th scope="col">Percent of persons at perceived risk</th></tr></thead><tbody><tr><th scope="row">Friend</th><td>32%</td></tr><tr><th scope="row">Neighbor, coworker, or other</th><td>25%</td></tr><tr><th scope="row">Other close family member</th><td>22%</td></tr><tr><th scope="row">Spouse or intimate partner</th><td>7%</td></tr><tr><th scope="row">Parent or stepparent</th><td>6%</td></tr><tr><th scope="row">Child or stepchild</th><td>6%</td></tr></tbody></table></div></div></figure>
+<h3>Sex or gender</h3>
+<figure class="chart"><figcaption>Sex or gender of the person at perceived risk</figcaption><div class="chart-row"><div class="chart-vis"><svg viewBox="0 0 220 220" width="220" height="220" role="presentation" aria-hidden="true" focusable="false" class="pie"><path d="M110.00,110.00 L110.00,2.00 A108.00,108.00 0 1 1 2.92,95.90 Z" fill="#0b3d66"/><path d="M110.00,110.00 L2.92,95.90 A108.00,108.00 0 0 1 95.90,2.92 Z" fill="#1f6fb2"/><path d="M110.00,110.00 L95.90,2.92 A108.00,108.00 0 0 1 110.00,2.00 Z" fill="#3a9bd9"/></svg><ul class="legend"><li><span class="swatch" style="background:#0b3d66" aria-hidden="true"></span>Male</li><li><span class="swatch" style="background:#1f6fb2" aria-hidden="true"></span>Female</li><li><span class="swatch" style="background:#3a9bd9" aria-hidden="true"></span>Nonbinary</li></ul></div><div class="chart-data"><table class="data"><caption>Sex or gender (other-directed violence)</caption><thead><tr><th scope="col">Category</th><th scope="col">Percent of persons at perceived risk</th></tr></thead><tbody><tr><th scope="row">Male</th><td>74%</td></tr><tr><th scope="row">Female</th><td>20%</td></tr><tr><th scope="row">Nonbinary <a href="#fn-nb" class="fn">*</a></th><td>2%</td></tr></tbody></table></div></div></figure>
+<h3>Age</h3>
+<figure class="chart"><figcaption>Age of the person at perceived risk</figcaption><div class="chart-row"><div class="chart-vis"><svg viewBox="0 0 220 220" width="220" height="220" role="presentation" aria-hidden="true" focusable="false" class="pie"><path d="M110.00,110.00 L110.00,2.00 A108.00,108.00 0 0 1 180.60,28.28 Z" fill="#0b3d66"/><path d="M110.00,110.00 L180.60,28.28 A108.00,108.00 0 0 1 217.31,122.22 Z" fill="#1f6fb2"/><path d="M110.00,110.00 L217.31,122.22 A108.00,108.00 0 0 1 113.50,217.94 Z" fill="#3a9bd9"/><path d="M110.00,110.00 L113.50,217.94 A108.00,108.00 0 0 1 2.35,101.26 Z" fill="#7fc3e8"/><path d="M110.00,110.00 L2.35,101.26 A108.00,108.00 0 0 1 44.83,23.88 Z" fill="#173a5e"/><path d="M110.00,110.00 L44.83,23.88 A108.00,108.00 0 0 1 110.00,2.00 Z" fill="#5aa9d6"/></svg><ul class="legend"><li><span class="swatch" style="background:#0b3d66" aria-hidden="true"></span>0-19 years</li><li><span class="swatch" style="background:#1f6fb2" aria-hidden="true"></span>20-29 years</li><li><span class="swatch" style="background:#3a9bd9" aria-hidden="true"></span>30-39 years</li><li><span class="swatch" style="background:#7fc3e8" aria-hidden="true"></span>40-49 years</li><li><span class="swatch" style="background:#173a5e" aria-hidden="true"></span>50-59 years</li><li><span class="swatch" style="background:#5aa9d6" aria-hidden="true"></span>60+ years</li></ul></div><div class="chart-data"><table class="data"><caption>Age (other-directed violence)</caption><thead><tr><th scope="col">Category</th><th scope="col">Percent of persons at perceived risk</th></tr></thead><tbody><tr><th scope="row">0-19 years</th><td>11%</td></tr><tr><th scope="row">20-29 years</th><td>15%</td></tr><tr><th scope="row">30-39 years</th><td>22%</td></tr><tr><th scope="row">40-49 years</th><td>26%</td></tr><tr><th scope="row">50-59 years</th><td>13%</td></tr><tr><th scope="row">60+ years</th><td>10%</td></tr></tbody></table></div></div></figure>
+</section>
+<section aria-labelledby="self-h"><h2 id="self-h">Persons at perceived risk of self-directed violence</h2>
+<p>They were described as follows. Highlights: 33% friends; 47% male; 28% are 20-29 years old.</p>
+<h3>Relationship to the respondent</h3>
+<figure class="chart"><figcaption>Relationship of the person at perceived risk to the respondent</figcaption><div class="chart-row"><div class="chart-vis"><svg viewBox="0 0 220 220" width="220" height="220" role="presentation" aria-hidden="true" focusable="false" class="pie"><path d="M110.00,110.00 L110.00,2.00 A108.00,108.00 0 0 1 202.36,165.99 Z" fill="#2f5d1e"/><path d="M110.00,110.00 L202.36,165.99 A108.00,108.00 0 0 1 89.35,216.01 Z" fill="#4f8a32"/><path d="M110.00,110.00 L89.35,216.01 A108.00,108.00 0 0 1 6.46,140.73 Z" fill="#6faa3f"/><path d="M110.00,110.00 L6.46,140.73 A108.00,108.00 0 0 1 30.05,37.39 Z" fill="#9ac45f"/><path d="M110.00,110.00 L30.05,37.39 A108.00,108.00 0 0 1 69.47,9.89 Z" fill="#3f6f24"/><path d="M110.00,110.00 L69.47,9.89 A108.00,108.00 0 0 1 110.00,2.00 Z" fill="#86b94f"/></svg><ul class="legend"><li><span class="swatch" style="background:#2f5d1e" aria-hidden="true"></span>Friend</li><li><span class="swatch" style="background:#4f8a32" aria-hidden="true"></span>Other close family member</li><li><span class="swatch" style="background:#6faa3f" aria-hidden="true"></span>Neighbor, coworker, or other</li><li><span class="swatch" style="background:#9ac45f" aria-hidden="true"></span>Child or stepchild</li><li><span class="swatch" style="background:#3f6f24" aria-hidden="true"></span>Spouse or intimate partner</li><li><span class="swatch" style="background:#86b94f" aria-hidden="true"></span>Parent or stepparent</li></ul></div><div class="chart-data"><table class="data"><caption>Relationship (self-directed violence)</caption><thead><tr><th scope="col">Category</th><th scope="col">Percent of persons at perceived risk</th></tr></thead><tbody><tr><th scope="row">Friend</th><td>33%</td></tr><tr><th scope="row">Other close family member</th><td>19%</td></tr><tr><th scope="row">Neighbor, coworker, or other</th><td>17%</td></tr><tr><th scope="row">Child or stepchild</th><td>16%</td></tr><tr><th scope="row">Spouse or intimate partner</th><td>7%</td></tr><tr><th scope="row">Parent or stepparent</th><td>6%</td></tr></tbody></table></div></div></figure>
+<h3>Sex or gender</h3>
+<figure class="chart"><figcaption>Sex or gender of the person at perceived risk</figcaption><div class="chart-row"><div class="chart-vis"><svg viewBox="0 0 220 220" width="220" height="220" role="presentation" aria-hidden="true" focusable="false" class="pie"><path d="M110.00,110.00 L110.00,2.00 A108.00,108.00 0 0 1 117.06,217.77 Z" fill="#2f5d1e"/><path d="M110.00,110.00 L117.06,217.77 A108.00,108.00 0 0 1 95.90,2.92 Z" fill="#4f8a32"/><path d="M110.00,110.00 L95.90,2.92 A108.00,108.00 0 0 1 110.00,2.00 Z" fill="#6faa3f"/></svg><ul class="legend"><li><span class="swatch" style="background:#2f5d1e" aria-hidden="true"></span>Male</li><li><span class="swatch" style="background:#4f8a32" aria-hidden="true"></span>Female</li><li><span class="swatch" style="background:#6faa3f" aria-hidden="true"></span>Nonbinary</li></ul></div><div class="chart-data"><table class="data"><caption>Sex or gender (self-directed violence)</caption><thead><tr><th scope="col">Category</th><th scope="col">Percent of persons at perceived risk</th></tr></thead><tbody><tr><th scope="row">Male</th><td>47%</td></tr><tr><th scope="row">Female</th><td>47%</td></tr><tr><th scope="row">Nonbinary <a href="#fn-nb" class="fn">*</a></th><td>2%</td></tr></tbody></table></div></div></figure>
+<h3>Age</h3>
+<figure class="chart"><figcaption>Age of the person at perceived risk</figcaption><div class="chart-row"><div class="chart-vis"><svg viewBox="0 0 220 220" width="220" height="220" role="presentation" aria-hidden="true" focusable="false" class="pie"><path d="M110.00,110.00 L110.00,2.00 A108.00,108.00 0 0 1 202.94,54.99 Z" fill="#2f5d1e"/><path d="M110.00,110.00 L202.94,54.99 A108.00,108.00 0 0 1 141.04,213.44 Z" fill="#4f8a32"/><path d="M110.00,110.00 L141.04,213.44 A108.00,108.00 0 0 1 22.83,173.76 Z" fill="#6faa3f"/><path d="M110.00,110.00 L22.83,173.76 A108.00,108.00 0 0 1 4.38,87.43 Z" fill="#9ac45f"/><path d="M110.00,110.00 L4.38,87.43 A108.00,108.00 0 0 1 44.83,23.88 Z" fill="#3f6f24"/><path d="M110.00,110.00 L44.83,23.88 A108.00,108.00 0 0 1 110.00,2.00 Z" fill="#86b94f"/></svg><ul class="legend"><li><span class="swatch" style="background:#2f5d1e" aria-hidden="true"></span>0-19 years</li><li><span class="swatch" style="background:#4f8a32" aria-hidden="true"></span>20-29 years</li><li><span class="swatch" style="background:#6faa3f" aria-hidden="true"></span>30-39 years</li><li><span class="swatch" style="background:#9ac45f" aria-hidden="true"></span>40-49 years</li><li><span class="swatch" style="background:#3f6f24" aria-hidden="true"></span>50-59 years</li><li><span class="swatch" style="background:#86b94f" aria-hidden="true"></span>60+ years</li></ul></div><div class="chart-data"><table class="data"><caption>Age (self-directed violence)</caption><thead><tr><th scope="col">Category</th><th scope="col">Percent of persons at perceived risk</th></tr></thead><tbody><tr><th scope="row">0-19 years</th><td>16%</td></tr><tr><th scope="row">20-29 years</th><td>28%</td></tr><tr><th scope="row">30-39 years</th><td>19%</td></tr><tr><th scope="row">40-49 years</th><td>13%</td></tr><tr><th scope="row">50-59 years</th><td>11%</td></tr><tr><th scope="row">60+ years</th><td>10%</td></tr></tbody></table></div></div></figure>
+</section>
+<blockquote class="fnbox" id="fn-nb"><p>* Nonbinary includes any gender other than &quot;male&quot; or &quot;female.&quot;</p><p>Note: Percentages may not sum to 100% due to rounding and non-responses.</p></blockquote>
+<section aria-labelledby="like-h"><h2 id="like-h">Likelihood of harm in the next year</h2><ul class="likely">
+<li><strong>27%</strong> of respondents said it was likely or very likely the person will hurt another person in the next year.</li>
+<li><strong>22%</strong> of respondents said it was likely or very likely the person will hurt themselves in the next year.</li>
+</ul></section>
+<section aria-labelledby="why-h"><h2 id="why-h">Why respondents were concerned</h2>
+<table class="data reasons"><caption>Respondents were concerned about violence because the person has...</caption><thead><tr><th scope="col">Reason</th><th scope="col">Other-directed violence (relative)</th><th scope="col">Self-directed violence (relative)</th></tr></thead><tbody><tr><th scope="row">Trouble with alcohol or drugs</th><td>highest</td><td>moderate</td></tr><tr><th scope="row">Hurt someone else before</th><td>high</td><td>low</td></tr><tr><th scope="row">Hurt themselves before</th><td>low</td><td>highest</td></tr><tr><th scope="row">Talked about violence or made threats</th><td>moderate</td><td>moderate</td></tr><tr><th scope="row">Suffered a major loss</th><td>low-moderate</td><td>high</td></tr></tbody></table><p class="note">Note: Source bars run on a 0%-50% axis with no numeric labels. Values describe relative bar length (for example "highest" or "low"); the original chart shows no exact percentages, so none are given here.</p>
+</section>
+<section aria-labelledby="act-h"><h2 id="act-h">Actions taken to reduce risk</h2>
+<div class="stat-grid"><div class="stat"><div class="donut-wrap"><svg viewBox="0 0 160 160" width="160" height="160" role="presentation" aria-hidden="true" focusable="false" class="donut"><circle cx="80.0" cy="80.0" r="68.00" fill="none" stroke="#d7d7e0" stroke-width="14"/><circle cx="80.0" cy="80.0" r="68.00" fill="none" stroke="#1f6fb2" stroke-width="14" stroke-linecap="round" stroke-dasharray="286.26 427.26" transform="rotate(-90 80.0 80.0)"/><circle cx="80.0" cy="80.0" r="60.00" fill="#ffffff"/></svg><span class="donut-num" aria-hidden="true">67%</span></div><p><span class="stat-num">67%</span> of respondents who knew someone at perceived risk of other-directed violence took one or more actions to reduce their own risk of being hurt by the person.</p></div><div class="stat"><div class="donut-wrap"><svg viewBox="0 0 160 160" width="160" height="160" role="presentation" aria-hidden="true" focusable="false" class="donut"><circle cx="80.0" cy="80.0" r="68.00" fill="none" stroke="#d7d7e0" stroke-width="14"/><circle cx="80.0" cy="80.0" r="68.00" fill="none" stroke="#1f6fb2" stroke-width="14" stroke-linecap="round" stroke-dasharray="363.17 427.26" transform="rotate(-90 80.0 80.0)"/><circle cx="80.0" cy="80.0" r="60.00" fill="#ffffff"/></svg><span class="donut-num" aria-hidden="true">85%</span></div><p><span class="stat-num">85%</span> of respondents who knew someone at perceived risk of self-directed violence took one or more actions to reduce the risk of the person hurting themselves.</p></div></div>
+</section>
+<section aria-labelledby="noact-h"><h2 id="noact-h">Why some respondents did not take action</h2>
+<table class="data reasons"><caption>Some respondents didn&#x27;t take action because...</caption><thead><tr><th scope="col">Reason</th><th scope="col">Other-directed violence (relative)</th><th scope="col">Self-directed violence (relative)</th></tr></thead><tbody><tr><th scope="row">Dangerous situation didn&#x27;t seem likely</th><td>high</td><td>highest</td></tr><tr><th scope="row">Seemed like a personal matter</th><td>moderate</td><td>high</td></tr><tr><th scope="row">Didn&#x27;t think their actions would help</th><td>low</td><td>moderate</td></tr><tr><th scope="row">Thought it might make the situation worse</th><td>low</td><td>moderate</td></tr></tbody></table><p class="note">Note: Source bars run on a 0%-50% axis with no numeric labels. Values describe relative bar length (for example "highest" or "low"); the original chart shows no exact percentages, so none are given here.</p>
+</section>
+<section aria-labelledby="fire-h"><h2 id="fire-h">Access to firearms</h2>
+<p class="lead">1 in 5 persons at perceived risk to others and 1 in 10 persons at perceived risk to themselves have access to firearms.</p></section>
+<section aria-labelledby="learn-h"><h2 id="learn-h">What we learned</h2><ul class="takeaways">
+<li>An estimated 6.5 million Californians -- 1 in 5 adults -- are concerned someone they know, usually a friend or family member, is at risk of violence to others or themselves.</li>
+<li>The ability to identify when someone is behaving dangerously or exhibiting warning signs is an important component of violence prevention efforts.</li>
+<li>Access to firearms is common among persons at perceived risk of violence, though taking action to reduce this access was rare.</li>
+<li>Continued efforts to empower the public, especially those close to people at elevated risk, to act on their knowledge about risk factors for violence are needed.</li>
+</ul></section>
+<section aria-labelledby="meth-h"><h2 id="meth-h">About the survey</h2>
+<div class="methodology"><p>The California Safety and Wellbeing Survey (CSaWS) is an ongoing, statewide, probability-based Internet survey developed by the California Firearm Violence Research Center and administered by the research firm Ipsos. CSaWS asks questions on a wide range of topics related to firearm ownership and exposure to violence and its consequences. More than 2,500 California adults participate in CSaWS at each wave, and their answers are weighted to be statistically representative of the adult population of the state. The 2020 wave of CSaWS was administered from July 14-27, 2020, with funding from the State of California.</p></div></section>
+<section aria-labelledby="cite-h"><h2 id="cite-h">Recommended citation</h2>
+<p>Aubel AJ, Wintemute GJ, Kravitz-Wirtz N. Anticipatory concerns about violence within social networks: prevalence and implications for prevention. Prev. Med. 2023;167:107421.</p>
+<p>DOI: <a href="https://doi.org/10.1016/j.ypmed.2023.107421">10.1016/j.ypmed.2023.107421</a> &middot; PMID: 36641127 &middot; <a href="https://www.sciencedirect.com/science/article/pii/S0091743523000014">Read the full study</a></p></section>
+<section aria-labelledby="disc-h"><h2 id="disc-h">Disclaimer</h2>
+<p>The California Firearm Violence Research Center is housed at the UC Davis Violence Prevention Research Program. For more information, visit health.ucdavis.edu/vprp/ucfc or send an email to hs-vprp@ucdavis.edu. This content is solely the responsibility of the study&#x27;s authors and does not necessarily represent the views of the California Firearm Violence Research Center.</p></section>
+<aside class="editor" aria-labelledby="ed-h"><h2 id="ed-h">About this accessible edition</h2><p>This is a faithful, accessible (WCAG 2.1 AA) digital re-creation of a two-page infographic published by the California Firearm Violence Research Center at UC Davis Health. All survey figures are transcribed exactly as printed in the original. The two reasons-related bar charts in the original carry no numeric labels, so they are presented here as ordered categories with a relative-magnitude description rather than invented percentages. This edition is not affiliated with or endorsed by UC Davis.</p><p class="crisis">If you or someone you know is in crisis, call or text 988 (the U.S. Suicide and Crisis Lifeline), available 24/7. In an emergency, call 911. This crisis resource is added by this accessible edition and was not part of the original infographic.</p></aside>
+</div></main>
+<footer class="brief"><div class="wrap"><p>The California Firearm Violence Research Center is housed at the UC Davis Violence Prevention Research Program. For more information, visit health.ucdavis.edu/vprp/ucfc or send an email to hs-vprp@ucdavis.edu. This content is solely the responsibility of the study&#x27;s authors and does not necessarily represent the views of the California Firearm Violence Research Center.</p><p>Accessible edition generated from a single source of truth; all survey figures transcribed faithfully from the original infographic.</p></div></footer>
+</body></html>
