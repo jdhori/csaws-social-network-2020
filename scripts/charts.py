@@ -6,20 +6,26 @@ assistive technology reads the table, not the graphic. Because the graphics are
 purely visual we can draw them with plain arc math -- no charting library, no
 fonts to embed, no network access.
 
-Palettes loosely echo the original infographic (blues for other-directed
-violence, greens for self-directed) while meeting >=3:1 non-text contrast
-against the white page for adjacent slices.
+Palettes reproduce the EXACT colours of the original infographic, sampled from
+the source PDF's own vector content (rgb() fills -> hex). Ordering matches the
+original's size-ordered slices (cyan/yellow on the largest wedge, a purple wedge
+for the blue set, dark teal-green for the green set). Because every chart is
+DECORATIVE (aria-hidden) and backed by a real data table plus a dark-ink HTML
+legend, reproducing the source's light wedges (cyan #6ce5e8, yellow #ffde59) is
+faithful; a white inter-slice border keeps the wedges visually separable.
 """
 
 import math
 
-# Qualitative palettes (color-blind-considerate ordering, distinct lightness
-# steps so adjacent slices remain distinguishable without relying on hue alone).
-BLUE_PALETTE = ["#0b3d66", "#1f6fb2", "#3a9bd9", "#7fc3e8", "#173a5e", "#5aa9d6"]
-GREEN_PALETTE = ["#2f5d1e", "#4f8a32", "#6faa3f", "#9ac45f", "#3f6f24", "#86b94f"]
+# Exact designer hexes (sampled from the source PDF vector), ordered to mirror
+# the original's slice assignment for the size-ordered categories in content.py.
+BLUE_PALETTE = ["#6ce5e8", "#41b8d5", "#8a79b5", "#2d8bba", "#2f5f98", "#1f3b60"]
+GREEN_PALETTE = ["#ffde59", "#b0c24d", "#005a55", "#6da556", "#347e4a", "#045d2a"]
 
-BLUE = "#1f6fb2"
-GREEN = "#4f8a32"
+# Bar-series / single-stat-donut colours: the steel blue (#2f5f98) and green
+# (#6da556) the original uses for its grouped bars (both meet >=3:1 on white).
+BLUE = "#2f5f98"
+GREEN = "#6da556"
 
 
 def _polar(cx, cy, r, angle_deg):
@@ -44,10 +50,13 @@ def pie_svg(data, palette, size=240, inner_ratio=0.0):
         frac = pct / total
         sweep = frac * 360
         color = palette[i % len(palette)]
+        # Thin white border between wedges (matches the original) so light slices
+        # (cyan/yellow) stay separable against each other and the white card.
+        sep = 'stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"'
         if frac >= 0.9999:  # single full-circle slice
             parts.append(
                 f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r:.2f}" '
-                f'fill="{color}"/>'
+                f'fill="{color}" {sep}/>'
             )
             angle += sweep
             continue
@@ -67,8 +76,14 @@ def pie_svg(data, palette, size=240, inner_ratio=0.0):
                 f"M{cx:.2f},{cy:.2f} L{x1:.2f},{y1:.2f} "
                 f"A{r:.2f},{r:.2f} 0 {large} 1 {x2:.2f},{y2:.2f} Z"
             )
-        parts.append(f'<path d="{d}" fill="{color}"/>')
+        parts.append(f'<path d="{d}" fill="{color}" {sep}/>')
         angle += sweep
+    # Faint outer ring so the disc edge reads against the white card even where
+    # the outermost wedge is a very light colour.
+    parts.append(
+        f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r:.2f}" fill="none" '
+        f'stroke="rgba(20,30,45,0.18)" stroke-width="1"/>'
+    )
     body = "".join(parts)
     return (
         f'<svg viewBox="0 0 {size} {size}" width="{size}" height="{size}" '

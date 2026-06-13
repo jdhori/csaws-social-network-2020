@@ -15,6 +15,7 @@ graphics -- rebuilt so it is fully accessible:
 - Print CSS makes the same markup render as a clean tagged PDF/UA-1.
 """
 
+import base64
 import html
 import json
 from pathlib import Path
@@ -25,6 +26,7 @@ import charts
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "document" / "CSaWS_SocialNetwork.html"
 LIB = HERE / "lib"
+ASSETS = HERE / "assets"
 
 # Bars are plotted on the source chart's 0%-50% axis.
 AXIS_MAX = 50
@@ -42,6 +44,36 @@ DONUT_SPECS = {}
 
 def read_lib(name):
     return (LIB / name).read_text(encoding="utf-8")
+
+
+def asset_data_uri(name, mime="image/png"):
+    """Inline a brand asset as a base64 data: URI so the file stays self-contained
+    (zero external requests) and works under the strict CSP (img-src data:)."""
+    raw = (ASSETS / name).read_bytes()
+    return f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
+
+
+def brand_logo(name, alt, cls):
+    """A real brand asset from the original document, with a meaningful accessible
+    name (it conveys the source organisation, so it is NOT aria-hidden)."""
+    return (f'<img class="{cls}" src="{asset_data_uri(name)}" alt="{esc(alt)}" '
+            f'decoding="async" loading="lazy">')
+
+
+def alarm_clock_svg():
+    """Decorative lavender alarm-clock icon echoing the original's 27%/22% panel.
+    aria-hidden: it carries no information the adjacent text does not."""
+    c = "#8a79b5"
+    return (
+        '<svg class="clock" aria-hidden="true" focusable="false" role="presentation" '
+        'viewBox="0 0 64 64" width="64" height="64">'
+        f'<circle cx="32" cy="37" r="18" fill="#fff" stroke="{c}" stroke-width="5"/>'
+        f'<path d="M10 17 a9 9 0 0 1 13 -5" fill="none" stroke="{c}" stroke-width="5" stroke-linecap="round"/>'
+        f'<path d="M54 17 a9 9 0 0 0 -13 -5" fill="none" stroke="{c}" stroke-width="5" stroke-linecap="round"/>'
+        f'<path d="M19 54 l-5 7" stroke="{c}" stroke-width="5" stroke-linecap="round"/>'
+        f'<path d="M45 54 l5 7" stroke="{c}" stroke-width="5" stroke-linecap="round"/>'
+        f'<path d="M32 37 l0 -10 M32 37 l7 4" fill="none" stroke="{c}" stroke-width="4" stroke-linecap="round"/>'
+        '</svg>')
 
 
 def pie_config(title, rows, palette, desc):
@@ -314,6 +346,26 @@ def bar_chart(block, chart_id, desc=None):
     )
 
 
+def likelihood_cards(items):
+    """Big-number callouts with the lavender alarm-clock between them, mirroring
+    the original page-1 panel. The number is a visual echo (aria-hidden); the
+    value is announced once via the paragraph text (with an sr-only prefix)."""
+    blue, green = "like-num blue", "like-num green"
+    left, right = items[0], items[1]
+    return (
+        '<div class="like-row">'
+        f'<div class="like-card">'
+        f'<span class="{blue}" aria-hidden="true">{esc(left["percent"])}</span>'
+        f'<p><span class="sr-only">{esc(left["percent"])} </span>{esc(left["text"])}</p>'
+        f'</div>'
+        f'<div class="clock-wrap">{alarm_clock_svg()}</div>'
+        f'<div class="like-card">'
+        f'<span class="{green}" aria-hidden="true">{esc(right["percent"])}</span>'
+        f'<p><span class="sr-only">{esc(right["percent"])} </span>{esc(right["text"])}</p>'
+        f'</div>'
+        '</div>')
+
+
 def donut_pair(items, color, id_base="donut"):
     """Single-stat donuts with the full progressive-enhancement fallback chain:
 
@@ -372,8 +424,14 @@ a:focus-visible, summary:focus-visible, th a:focus-visible{
 /* Solid background (no gradient image): axe-core cannot evaluate contrast for
    text over a background-image, so a solid colour keeps the white hero text
    measurable and passing. A thin accent rule adds depth without an image. */
-header.hero{background:#0b2f55;color:#fff;padding:2rem 0 2.2rem;
-  border-bottom:4px solid #1f6fb2}
+header.hero{background:#193151;color:#fff;padding:1.6rem 0 2.2rem;
+  border-bottom:4px solid #2f5f98}
+.hero-brand{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem}
+/* CSaWS mark is dark navy + gold artwork; a white chip keeps it legible on the
+   navy band and reads as intentional. It conveys the source, so it has real alt
+   text (not aria-hidden). */
+.csaws-mark{width:46px;height:46px;background:#fff;border-radius:.5rem;padding:.25rem;
+  flex:0 0 auto}
 header.hero .eyebrow{margin:0;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;
   color:#bcd3ec;font-weight:700}
 header.hero h1{margin:.35rem 0 .4rem;font-size:clamp(1.6rem,1rem+3vw,2.8rem);line-height:1.12;
@@ -501,9 +559,24 @@ figure.bar-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
   width:5rem;height:5rem;border-radius:50%;background:#fff;display:grid;place-items:center;
   font-size:1.7rem;font-weight:800;color:var(--ink);pointer-events:none}
 
-/* Likelihood list */
-ul.likely,ul.takeaways{padding-left:1.2rem;margin:.4rem 0}
-ul.likely li,ul.takeaways li{margin:.45rem 0}
+/* Likelihood: big-number callouts with the alarm-clock between them */
+.like-row{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;
+  margin:.6rem 0 .4rem}
+.like-card{background:var(--panel);border:1px solid var(--line);border-radius:.6rem;
+  padding:1rem 1.2rem;display:flex;gap:.9rem;align-items:flex-start}
+.like-num{font-size:clamp(2.2rem,1.2rem+3vw,3.4rem);font-weight:800;line-height:1;
+  flex:0 0 auto;font-variant-numeric:tabular-nums}
+.like-num.blue{color:#2f5f98} .like-num.green{color:#3f6f24}
+.like-card p{margin:.15rem 0 0;font-size:.98rem}
+.clock-wrap{display:flex;justify-content:center;align-items:center}
+.clock{width:clamp(48px,5vw,72px);height:auto}
+ul.takeaways{padding-left:1.2rem;margin:.4rem 0}
+ul.takeaways li{margin:.45rem 0}
+
+/* Brand assets from the original document */
+.methodology{position:relative}
+.csaws-aside{float:right;width:96px;height:96px;margin:0 0 .6rem 1rem;shape-outside:circle()}
+.brand-lockup{display:block;height:auto;width:min(320px,80%);margin:0 0 1rem}
 
 /* "What we learned" accent panel */
 .learned{background:var(--lavender);border-radius:.7rem;padding:1.2rem 1.4rem;border:1px solid #d3cbe9}
@@ -526,6 +599,9 @@ footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted
   .bento{grid-template-columns:1fr}
   .bc-row{grid-template-columns:1fr}
   .bc-axis{margin-left:0}
+  .like-row{grid-template-columns:1fr;justify-items:stretch}
+  .clock-wrap{order:-1}
+  .brand-lockup{width:min(320px,100%)}
 }
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 
@@ -538,6 +614,7 @@ footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted
   .skip{display:none}
   header.hero, .callout, .learned, .methodology, .donut-card, .editor, .crisis,
   table.data thead th, ul.chips li, .lead, .bc-fill, .bc-track, .sw,
+  .like-card, .like-num, .clock, .csaws-mark,
   figure.pie-card, figure.bar-card{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   h2{string-set:section content();bookmark-level:1;bookmark-label:content()}
   /* Expand every data table in the PDF so the accessible representation prints. */
@@ -596,7 +673,8 @@ def build():
 <body>
 <a class="skip" href="#main">Skip to main content</a>
 <header class="hero"><div class="wrap">
-<p class="eyebrow">{esc(m['publisher'])} &middot; {esc(m['date'])}</p>
+<div class="hero-brand">{brand_logo("logo-csaws.png", "CSaWS — California Safety and Wellbeing Survey", "csaws-mark")}
+<p class="eyebrow">{esc(m['publisher'])} &middot; {esc(m['date'])}</p></div>
 <h1>{esc(m['title'])}</h1>
 <p class="sub">{esc(m['subtitle'])}</p>
 <div class="hero-stat">{pictogram(5, 1)}<span class="big">{esc(C.HEADLINE['stat'])}</span>
@@ -654,12 +732,11 @@ def build():
     a(f'<blockquote class="fnbox" id="fn-nb"><p>* {esc(C.FOOTNOTES[0])}</p>'
       f'<p>Note: {esc(C.FOOTNOTES[1])}</p></blockquote>')
 
-    # Likelihood
+    # Likelihood (big-number callouts with the alarm-clock, like the original)
     a('<section aria-labelledby="like-h">'
-      '<h2 id="like-h">Likelihood of harm in the next year</h2><ul class="likely">')
-    for it in C.LIKELIHOOD:
-        a(f'<li><strong>{esc(it["percent"])}</strong> {esc(it["text"])}</li>')
-    a('</ul></section>')
+      '<h2 id="like-h">Likelihood of harm in the next year</h2>')
+    a(likelihood_cards(C.LIKELIHOOD))
+    a('</section>')
 
     # Reasons for concern + firearms callout (bento)
     a('<section aria-labelledby="why-h"><h2 id="why-h">Why respondents were concerned</h2>')
@@ -693,7 +770,9 @@ def build():
 
     # Methodology
     a('<section aria-labelledby="meth-h"><h2 id="meth-h">About the survey</h2>')
-    a(f'<div class="methodology"><p>{esc(C.METHODOLOGY)}</p></div></section>')
+    a(f'<div class="methodology">'
+      f'{brand_logo("logo-csaws.png", "CSaWS — California Safety and Wellbeing Survey", "csaws-aside")}'
+      f'<p>{esc(C.METHODOLOGY)}</p></div></section>')
 
     # Citation
     a('<section aria-labelledby="cite-h"><h2 id="cite-h">Recommended citation</h2>')
@@ -713,7 +792,9 @@ def build():
       f'<p class="crisis">{esc(C.EDITOR_NOTE["crisis"])}</p></aside>')
 
     a('</div></main>')
-    a(f'<footer class="brief"><div class="wrap"><p>{esc(C.DISCLAIMER)}</p>'
+    a(f'<footer class="brief"><div class="wrap">'
+      f'{brand_logo("logo-ucdavis-cfvrc.png", "UC Davis Health — California Firearm Violence Research Center", "brand-lockup")}'
+      f'<p>{esc(C.DISCLAIMER)}</p>'
       f'<p>Accessible edition generated from a single source of truth; all '
       f'survey figures transcribed faithfully from the original infographic.</p>'
       f'</div></footer>')
