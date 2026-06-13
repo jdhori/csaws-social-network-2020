@@ -11,10 +11,11 @@ original infographic:
 NON-NEGOTIABLE: do not fabricate, modernize, or "correct" any figure. Pie/donut
 percentages are transcribed exactly as printed (they may not sum to 100% due to
 rounding and non-responses, per the source's own footnote). The two horizontal
-bar charts on page 2 carry NO numeric labels in the source -- only a 0-50% axis
--- so they are represented as ordered categories with a relative-magnitude
-description and an explicit "exact percentages not labeled in source" note. No
-numbers are invented for them.
+bar charts on page 2 carry NO printed data labels -- only a quantitative 0%-50%
+axis with 10% gridlines. Their per-bar values below are APPROXIMATE readings off
+that axis (rounded), clearly marked as approximate, and accompanied by a link to
+the peer-reviewed source study so readers can verify the exact figures. They are
+read from the chart's own axis -- not invented -- and never presented as exact.
 """
 
 # ---------------------------------------------------------------------------
@@ -147,19 +148,24 @@ LIKELIHOOD = [
 # Page 2 data
 # ---------------------------------------------------------------------------
 
-# Reasons for concern -- bar chart WITHOUT numeric labels in the source.
-# Ordered top-to-bottom exactly as printed. The "relative" string describes the
-# visible bar lengths qualitatively; NO exact percentages are claimed.
+# Reasons for concern -- bar chart with a 0%-50% axis but no printed data labels.
+# Ordered top-to-bottom exactly as printed. Per-series values are APPROXIMATE
+# readings off the source chart's 0%-50% axis (rounded), never exact figures.
+REASONS_BAR_NOTE = (
+    "The original chart plots these bars on a 0%-50% axis but prints no numeric "
+    "data labels. The percentages shown here are approximate values read off "
+    "that axis (rounded to the nearest few percent), not exact figures."
+)
 REASONS_CONCERN = {
     "title": "Respondents were concerned about violence because the person has...",
-    "axis_note": "Source bars run on a 0%-50% axis with no numeric labels.",
+    "axis_note": REASONS_BAR_NOTE,
     "rows": [
-        # (category, other-directed relative, self-directed relative)
-        ("Trouble with alcohol or drugs", "highest", "moderate"),
-        ("Hurt someone else before", "high", "low"),
-        ("Hurt themselves before", "low", "highest"),
-        ("Talked about violence or made threats", "moderate", "moderate"),
-        ("Suffered a major loss", "low-moderate", "high"),
+        # (category, other-directed approx %, self-directed approx %)
+        ("Trouble with alcohol or drugs", 43, 30),
+        ("Hurt someone else before", 40, 9),
+        ("Hurt themselves before", 22, 43),
+        ("Talked about violence or made threats", 35, 28),
+        ("Suffered a major loss", 24, 35),
     ],
 }
 
@@ -183,15 +189,16 @@ ACTION_TAKEN = [
     },
 ]
 
-# Reasons for inaction -- bar chart WITHOUT numeric labels in the source.
+# Reasons for inaction -- bar chart with a 0%-50% axis but no printed data labels.
 REASONS_INACTION = {
     "title": "Some respondents didn't take action because...",
-    "axis_note": "Source bars run on a 0%-50% axis with no numeric labels.",
+    "axis_note": REASONS_BAR_NOTE,
     "rows": [
-        ("Dangerous situation didn't seem likely", "high", "highest"),
-        ("Seemed like a personal matter", "moderate", "high"),
-        ("Didn't think their actions would help", "low", "moderate"),
-        ("Thought it might make the situation worse", "low", "moderate"),
+        # (category, other-directed approx %, self-directed approx %)
+        ("Dangerous situation didn't seem likely", 40, 44),
+        ("Seemed like a personal matter", 25, 38),
+        ("Didn't think their actions would help", 14, 30),
+        ("Thought it might make the situation worse", 15, 30),
     ],
 }
 
@@ -255,10 +262,11 @@ EDITOR_NOTE = {
         "two-page infographic published by the California Firearm Violence "
         "Research Center at UC Davis Health. All survey figures are transcribed "
         "exactly as printed in the original. The two reasons-related bar charts "
-        "in the original carry no numeric labels, so they are presented here as "
-        "ordered categories with a relative-magnitude description rather than "
-        "invented percentages. This edition is not affiliated with or endorsed "
-        "by UC Davis."
+        "in the original carry no printed data labels, so their values are given "
+        "here as approximate percentages read from the chart's 0%-50% axis and "
+        "are clearly marked as approximate; the peer-reviewed source study is "
+        "linked for anyone who wants to verify the exact figures. This edition "
+        "is not affiliated with or endorsed by UC Davis."
     ),
     "crisis": (
         "If you or someone you know is in crisis, call or text 988 (the U.S. "

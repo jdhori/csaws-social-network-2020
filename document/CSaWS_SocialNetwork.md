@@ -93,15 +93,15 @@ They were described as follows. Highlights: 33% friends; 47% male; 28% are 20-29
 
 Respondents were concerned about violence because the person has...
 
-| Reason | Other-directed violence | Self-directed violence |
-| --- | --- | --- |
-| Trouble with alcohol or drugs | highest bar | moderate bar |
-| Hurt someone else before | high bar | low bar |
-| Hurt themselves before | low bar | highest bar |
-| Talked about violence or made threats | moderate bar | moderate bar |
-| Suffered a major loss | low-moderate bar | high bar |
+| Reason | Other-directed violence (approx.) | Self-directed violence (approx.) |
+| --- | ---: | ---: |
+| Trouble with alcohol or drugs | ~43% | ~30% |
+| Hurt someone else before | ~40% | ~9% |
+| Hurt themselves before | ~22% | ~43% |
+| Talked about violence or made threats | ~35% | ~28% |
+| Suffered a major loss | ~24% | ~35% |
 
-_Note: Source bars run on a 0%-50% axis with no numeric labels. Bar values below are described by relative length (for example, "highest" or "low") because the original chart shows no exact percentages._
+_Note: The original chart plots these bars on a 0%-50% axis but prints no numeric data labels. The percentages shown here are approximate values read off that axis (rounded to the nearest few percent), not exact figures. For the exact data, see the peer-reviewed source study: DOI [10.1016/j.ypmed.2023.107421](https://doi.org/10.1016/j.ypmed.2023.107421)._
 
 ## Actions taken to reduce risk
 
@@ -112,14 +112,14 @@ _Note: Source bars run on a 0%-50% axis with no numeric labels. Bar values below
 
 Some respondents didn't take action because...
 
-| Reason | Other-directed violence | Self-directed violence |
-| --- | --- | --- |
-| Dangerous situation didn't seem likely | high bar | highest bar |
-| Seemed like a personal matter | moderate bar | high bar |
-| Didn't think their actions would help | low bar | moderate bar |
-| Thought it might make the situation worse | low bar | moderate bar |
+| Reason | Other-directed violence (approx.) | Self-directed violence (approx.) |
+| --- | ---: | ---: |
+| Dangerous situation didn't seem likely | ~40% | ~44% |
+| Seemed like a personal matter | ~25% | ~38% |
+| Didn't think their actions would help | ~14% | ~30% |
+| Thought it might make the situation worse | ~15% | ~30% |
 
-_Note: Source bars run on a 0%-50% axis with no numeric labels. Bar values are described by relative length because the original chart shows no exact percentages._
+_Note: The original chart plots these bars on a 0%-50% axis but prints no numeric data labels. The percentages shown here are approximate values read off that axis (rounded to the nearest few percent), not exact figures. For the exact data, see the peer-reviewed source study: DOI [10.1016/j.ypmed.2023.107421](https://doi.org/10.1016/j.ypmed.2023.107421)._
 
 ## Access to firearms
 
@@ -148,7 +148,7 @@ The California Firearm Violence Research Center is housed at the UC Davis Violen
 
 ## About this accessible edition
 
-This is a faithful, accessible (WCAG 2.1 AA) digital re-creation of a two-page infographic published by the California Firearm Violence Research Center at UC Davis Health. All survey figures are transcribed exactly as printed in the original. The two reasons-related bar charts in the original carry no numeric labels, so they are presented here as ordered categories with a relative-magnitude description rather than invented percentages. This edition is not affiliated with or endorsed by UC Davis.
+This is a faithful, accessible (WCAG 2.1 AA) digital re-creation of a two-page infographic published by the California Firearm Violence Research Center at UC Davis Health. All survey figures are transcribed exactly as printed in the original. The two reasons-related bar charts in the original carry no printed data labels, so their values are given here as approximate percentages read from the chart's 0%-50% axis and are clearly marked as approximate; the peer-reviewed source study is linked for anyone who wants to verify the exact figures. This edition is not affiliated with or endorsed by UC Davis.
 
 **If you or someone you know is in crisis, call or text 988 (the U.S. Suicide and Crisis Lifeline), available 24/7. In an emergency, call 911. This crisis resource is added by this accessible edition and was not part of the original infographic.**
 

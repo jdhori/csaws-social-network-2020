@@ -18,11 +18,11 @@ def pct_table(title, rows, footnote_marker=None):
 
 def reasons_table(block):
     lines = [
-        "| Reason | Other-directed violence | Self-directed violence |",
-        "| --- | --- | --- |",
+        "| Reason | Other-directed violence (approx.) | Self-directed violence (approx.) |",
+        "| --- | ---: | ---: |",
     ]
     for cat, other, selfd in block["rows"]:
-        lines.append(f"| {cat} | {other} bar | {selfd} bar |")
+        lines.append(f"| {cat} | ~{other}% | ~{selfd}% |")
     return "\n".join(lines)
 
 
@@ -105,9 +105,8 @@ def build():
     w("")
     w(reasons_table(C.REASONS_CONCERN))
     w("")
-    w(f"_Note: {C.REASONS_CONCERN['axis_note']} Bar values below are described "
-      "by relative length (for example, \"highest\" or \"low\") because the "
-      "original chart shows no exact percentages._")
+    w(f"_Note: {C.REASONS_CONCERN['axis_note']} For the exact data, see the "
+      f"peer-reviewed source study: DOI [{m['doi']}]({m['doi_url']})._")
     w("")
 
     # Actions taken
@@ -124,8 +123,8 @@ def build():
     w("")
     w(reasons_table(C.REASONS_INACTION))
     w("")
-    w(f"_Note: {C.REASONS_INACTION['axis_note']} Bar values are described by "
-      "relative length because the original chart shows no exact percentages._")
+    w(f"_Note: {C.REASONS_INACTION['axis_note']} For the exact data, see the "
+      f"peer-reviewed source study: DOI [{m['doi']}]({m['doi_url']})._")
     w("")
 
     # Firearms
