@@ -89,17 +89,23 @@ def pie_config(title, rows, palette, desc):
         "colors": colors,
         "accessibility": {"enabled": True, "description": desc,
                           "point": {"valueSuffix": "%"}},
-        # No persistent SVG <text>: Highcharts data labels / legend render as SVG
-        # text, which axe-core cannot resolve a background for and reports as
-        # false-positive contrast failures. We disable both and keep an HTML
-        # swatch legend (real, measurable text) for the colour->category mapping;
-        # values are announced by the accessibility module on keyboard focus and
-        # listed in the data table.
+        # On-slice data labels (category + verbatim percent) make the interactive
+        # pie self-describing -- the infographic look the source uses. These render
+        # as SVG <text>; axe-core cannot resolve a background for SVG text and flags
+        # it as a *contrast incomplete* (needs-review), NOT a violation. pa11y.json's
+        # levelCapWhenNeedsReview demotes those incompletes to warnings (nothing is
+        # hidden from the scan; genuine violations still error). The data <table>
+        # (always in the DOM; shown when JS is off / in print) is the accessible
+        # source of truth, and the accessibility module announces each slice value.
         "legend": {"enabled": False},
         "tooltip": {"pointFormat": "<b>{point.y}%</b>"},
         "plotOptions": {"pie": {
             "borderWidth": 1, "borderColor": "#ffffff",
-            "dataLabels": {"enabled": False}}},
+            "dataLabels": {"enabled": True,
+                           "format": "{point.name}: {point.y}%",
+                           "distance": 14, "connectorWidth": 1,
+                           "style": {"fontSize": "11px", "fontWeight": "600",
+                                     "color": "#1a1f29", "textOutline": "none"}}}},
         "series": [{"name": title, "colorByPoint": True, "data": data}],
     }
 
@@ -209,37 +215,29 @@ def pct_table(caption, rows, footnote=False):
     )
 
 
-def details_table(summary, table_html):
-    """Tuck a data table into a collapsible <details> so the visual leads while
-    the accessible representation stays in the DOM."""
-    return (
-        f'<details class="data-details"><summary>{esc(summary)}</summary>'
-        f'<div class="dd-body">{table_html}</div></details>'
-    )
-
-
 def pie_card(chart_id, title, table_caption, rows, palette, footnote=False, desc=None):
     """One pie figure with the full progressive-enhancement fallback chain:
 
-      1. interactive accessible Highcharts pie  (screen, only once chart-ready)
+      1. interactive accessible Highcharts pie  (screen, only once chart-ready;
+         draws on-slice category + percent labels -- the infographic look)
       2. static decorative SVG pie               (default; print; JS-off)
-      3. collapsible data <table>                (always in the DOM)
+      3. data <table>                            (always in the DOM)
 
     JS adds `.chart-ready` to this figure only if Highcharts initializes, which
-    flips CSS from the static SVG to the interactive chart. If JS is disabled or
-    Highcharts fails, the static SVG stays -- and the data table is always there.
+    flips CSS from the static SVG to the interactive chart AND collapses the data
+    table to screen-reader-only (.chart-data -> sr-only; still read by AT). If JS
+    is disabled or Highcharts fails, the static SVG and the full data table both
+    stay visible.
     """
     PIE_SPECS[chart_id] = pie_config(title, rows, palette, desc or table_caption)
     svg = charts.pie_svg(rows, palette, size=200)
-    legend = charts.legend_swatches(rows, palette)
     table = pct_table(table_caption, rows, footnote)
     return (
         f'<figure class="pie-card chart-figure">'
         f'<figcaption>{esc(title)}</figcaption>'
         f'<div class="pie-interactive" id="{esc(chart_id)}"></div>'
         f'<div class="pie-vis pie-static">{svg}</div>'
-        f'{legend}'
-        f'{details_table("Show the data table: " + table_caption, table)}'
+        f'<div class="chart-data">{table}</div>'
         f'</figure>'
     )
 
@@ -253,8 +251,15 @@ def pictogram(total=5, filled=1):
              '<path d="M14 16 c-6 0 -9 4 -9 10 v8 h18 v-8 c0 -6 -3 -10 -9 -10 z" />')
     figs = []
     for i in range(total):
-        cls = "on" if i < filled else "off"
-        figs.append(f'<g class="pg {cls}" transform="translate({i*30},2)">{glyph}</g>')
+        on = i < filled
+        cls = "on" if on else "off"
+        # Inline presentation fills so WeasyPrint -- which does not cascade the
+        # document <style> into inline SVG -- renders the white figures on the
+        # navy stat card; the .pictogram CSS rules give the identical result in
+        # browsers (CSS overrides these presentation attributes there).
+        fill = 'fill="#ffffff"' if on else 'fill="#ffffff" fill-opacity="0.34"'
+        figs.append(
+            f'<g class="pg {cls}" {fill} transform="translate({i*30},2)">{glyph}</g>')
     return (
         f'<svg class="pictogram" aria-hidden="true" focusable="false" '
         f'viewBox="0 0 {total*30-2} 40" width="{total*30-2}" height="40" '
@@ -300,7 +305,8 @@ def bar_chart(block, chart_id, desc=None):
 
       1. interactive accessible Highcharts bar  (screen, only once chart-ready)
       2. static CSS grouped bars                (default; print; JS-off)
-      3. collapsible data <table>               (always in the DOM)
+      3. data <table>                           (always in the DOM; sr-only once
+         the interactive chart is ready)
 
     The static CSS graphic is aria-hidden; every number is repeated as real HTML
     text so axe-core measures contrast on HTML (not SVG), and it renders the same
@@ -340,7 +346,7 @@ def bar_chart(block, chart_id, desc=None):
         f'{legend}'
         f'<div class="bar-interactive" id="{esc(chart_id)}"></div>'
         f'<div class="barchart bar-static" aria-hidden="true">{"".join(rows)}{axis}</div>'
-        f'{details_table("Show the data table for this chart", bar_table(block))}'
+        f'<div class="chart-data">{bar_table(block)}</div>'
         f'{note}'
         f'</figure>'
     )
@@ -437,14 +443,24 @@ header.hero .eyebrow{margin:0;font-size:.85rem;letter-spacing:.12em;text-transfo
 header.hero h1{margin:.35rem 0 .4rem;font-size:clamp(1.6rem,1rem+3vw,2.8rem);line-height:1.12;
   max-width:24ch}
 header.hero p.sub{margin:.15rem 0;color:#d7e3f1;font-size:1.05rem}
-.hero-stat{display:flex;align-items:baseline;gap:.6rem;margin-top:1.1rem;
-  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.25);
-  border-radius:.6rem;padding:.7rem 1rem;max-width:34rem}
-.hero-stat .big{font-size:2.4rem;font-weight:800;color:#fff;line-height:1;white-space:nowrap}
-.hero-stat .txt{color:#eaf1f9;font-size:1rem}
+/* Intro row below the navy band: the survey question (left) paired with the
+   "1 in 5" headline stat (right), mirroring the original's two-column layout. */
+.intro-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
+  gap:1.2rem;align-items:stretch;margin-top:1.6rem}
+.intro-q{display:flex;flex-direction:column;justify-content:center;margin:0}
+.intro-q h2{margin-top:0}
+.intro-q .lead{margin:0}
+/* Navy stat card so the white pictogram figures stay legible; the ratio is also
+   stated in text, so the pictogram itself is decorative (aria-hidden). */
+.intro-stat{display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:.55rem;background:#193151;border-radius:.7rem;padding:1.4rem 1.2rem;color:#fff;
+  text-align:center}
+.intro-stat .big{font-size:clamp(2.6rem,1.6rem+3vw,3.4rem);font-weight:800;color:#fff;
+  line-height:1}
+.intro-stat .txt{color:#eaf1f9;font-size:1rem;max-width:22ch}
 /* Decorative '1 in 5' pictogram: 1 highlighted figure of 5. aria-hidden, so it
    adds no accessibility burden -- the ratio is also stated as text. */
-.pictogram{flex:0 0 auto;align-self:center;height:40px;width:auto}
+.pictogram{flex:0 0 auto;align-self:center;height:48px;width:auto}
 .pictogram .pg.on path{fill:#ffffff}
 .pictogram .pg.off path{fill:rgba(255,255,255,.34)}
 
@@ -474,27 +490,20 @@ figure.pie-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
 .pie{max-width:100%;height:auto}
 /* Progressive enhancement: static SVG is the DEFAULT; the interactive Highcharts
    pie is hidden until JS adds .chart-ready to the figure. Then we swap to the
-   interactive chart and hide the now-redundant static SVG + swatch legend
-   (Highcharts draws its own data labels). */
+   interactive chart (which draws its own on-slice category + percent labels) and
+   hide the now-redundant static SVG. */
 .pie-interactive{display:none;min-height:240px}
 .chart-figure.chart-ready .pie-interactive{display:block}
 .chart-figure.chart-ready .pie-static{display:none}
-/* The HTML swatch legend stays visible in the interactive view too: the
-   interactive pie intentionally draws no SVG text labels, so the legend is the
-   sighted-user colour key. */
 .highcharts-credits{display:none}
-ul.legend{list-style:none;margin:.6rem 0 0;padding:0;text-align:left;display:grid;gap:.2rem;
-  font-size:.88rem}
-ul.legend .swatch{display:inline-block;width:.85rem;height:.85rem;border-radius:2px;
-  margin-right:.45rem;vertical-align:middle;border:1px solid rgba(0,0,0,.25)}
 
-/* Tables (collapsed under charts) */
-details.data-details{margin-top:.7rem;text-align:left;border:1px solid var(--line);
-  border-radius:.4rem;background:var(--panel)}
-details.data-details>summary{cursor:pointer;padding:.5rem .7rem;font-weight:600;
-  color:var(--blue-dark);font-size:.9rem;list-style-position:inside}
-details.data-details[open]>summary{border-bottom:1px solid var(--line)}
-.dd-body{padding:.6rem .7rem}
+/* Data tables: the always-in-DOM accessible source. Visible by default (and in
+   print / JS-off, where .chart-ready is never set), each one collapses to
+   screen-reader-only once its interactive chart takes over -- AT still reads it,
+   but the infographic stays clean. */
+.chart-data{margin-top:.7rem;text-align:left}
+.chart-figure.chart-ready .chart-data{position:absolute;width:1px;height:1px;
+  padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 table.data{border-collapse:collapse;width:100%;font-size:.95rem}
 table.data caption{text-align:left;font-weight:700;color:var(--brand);padding:.2rem 0 .4rem;
   font-size:.98rem}
@@ -596,6 +605,7 @@ blockquote.fnbox{margin:1rem 0;background:var(--panel);border-left:4px solid var
 footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted);font-size:.88rem}
 
 @media (max-width:760px){
+  .intro-row{grid-template-columns:1fr}
   .bento{grid-template-columns:1fr}
   .bc-row{grid-template-columns:1fr}
   .bc-axis{margin-left:0}
@@ -617,10 +627,8 @@ footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted
   .like-card, .like-num, .clock, .csaws-mark,
   figure.pie-card, figure.bar-card{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   h2{string-set:section content();bookmark-level:1;bookmark-label:content()}
-  /* Expand every data table in the PDF so the accessible representation prints. */
-  details.data-details>summary{display:none!important}
-  details.data-details>.dd-body{display:block!important}
-  details.data-details{background:none;border:0}
+  /* .chart-ready is never set in print (no JS), so every .chart-data table is
+     already visible -- the accessible representation prints in full. */
   /* A data table that splits across a page break crashes WeasyPrint's PDF/UA
      tagger ("Table wrapper without a table"); the caption break-after is required. */
   table.data{break-inside:avoid}
@@ -636,7 +644,6 @@ footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted
      prints; this also forces it if a browser prints after enhancement. */
   .pie-interactive{display:none!important}
   .chart-figure .pie-static{display:flex!important}
-  .chart-figure ul.legend{display:grid!important}
   /* Same for bar charts: print the static CSS bars, never the interactive layer. */
   .bar-interactive{display:none!important}
   .chart-figure .bar-static{display:grid!important}
@@ -677,8 +684,6 @@ def build():
 <p class="eyebrow">{esc(m['publisher'])} &middot; {esc(m['date'])}</p></div>
 <h1>{esc(m['title'])}</h1>
 <p class="sub">{esc(m['subtitle'])}</p>
-<div class="hero-stat">{pictogram(5, 1)}<span class="big">{esc(C.HEADLINE['stat'])}</span>
-<span class="txt">{esc(C.HEADLINE['detail'])}</span></div>
 </div></header>
 <main id="main"><div class="wrap">
 """
@@ -686,9 +691,15 @@ def build():
     s = [head]
     a = s.append
 
-    # The question
-    a('<section aria-labelledby="q-h"><h2 id="q-h">The question we asked</h2>')
-    a(f'<p class="lead">{esc(C.QUESTION)}</p></section>')
+    # The question, paired with the "1 in 5" headline stat (two-column intro row)
+    a('<section class="intro-row" aria-labelledby="q-h">')
+    a('<div class="intro-q"><h2 id="q-h">The question we asked</h2>'
+      f'<p class="lead">{esc(C.QUESTION)}</p></div>')
+    a('<aside class="intro-stat" aria-label="Headline statistic">'
+      f'{pictogram(5, 1)}'
+      f'<span class="big">{esc(C.HEADLINE["stat"])}</span>'
+      f'<span class="txt">{esc(C.HEADLINE["detail"])}</span>'
+      '</aside></section>')
 
     # Other-directed
     a('<section aria-labelledby="other-h">'
