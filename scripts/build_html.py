@@ -140,7 +140,10 @@ def donut_config(percent, color, desc):
         "accessibility": {"enabled": True, "description": desc,
                           "point": {"valueSuffix": "%"}},
         "legend": {"enabled": False},
-        "tooltip": {"pointFormat": "<b>{point.y}%</b>"},
+        # outside:true renders the tooltip in a top-level container (escaping the
+        # .donut-wrap stacking context) so the centre .donut-num chip can't paint
+        # over it; the chip is also pointer-events:none so hover reaches the ring.
+        "tooltip": {"pointFormat": "<b>{point.y}%</b>", "outside": True},
         "plotOptions": {"pie": {
             "innerSize": "76%", "borderWidth": 0,
             "dataLabels": {"enabled": False},
@@ -496,7 +499,7 @@ figure.bar-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
    (5rem chip) so its square bounding box stays inside the SVG's white hole. */
 .donut-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:5rem;height:5rem;border-radius:50%;background:#fff;display:grid;place-items:center;
-  font-size:1.7rem;font-weight:800;color:var(--ink)}
+  font-size:1.7rem;font-weight:800;color:var(--ink);pointer-events:none}
 
 /* Likelihood list */
 ul.likely,ul.takeaways{padding-left:1.2rem;margin:.4rem 0}
