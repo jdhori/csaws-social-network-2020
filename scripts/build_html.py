@@ -29,12 +29,14 @@ LIB = HERE / "lib"
 # Bars are plotted on the source chart's 0%-50% axis.
 AXIS_MAX = 50
 
-# Accessible interactive pie charts (Highcharts) are layered on top of the
-# static SVG + data table as progressive enhancement. Each pie's Highcharts
-# config is collected here and emitted in a single init script; the static SVG
-# and data table remain the default/fallback (and the only thing the tagged PDF
-# uses, since WeasyPrint runs no JavaScript).
+# Accessible interactive Highcharts are layered on top of the static graphic +
+# data table as progressive enhancement. Each chart's config is collected here
+# and emitted in a single init script; the static SVG/CSS graphic and the data
+# table remain the default/fallback (and the only thing the tagged PDF uses,
+# since WeasyPrint runs no JavaScript). PIE_SPECS holds the pies; BAR_SPECS the
+# grouped bar charts.
 PIE_SPECS = {}
+BAR_SPECS = {}
 
 
 def read_lib(name):
@@ -66,6 +68,56 @@ def pie_config(title, rows, palette, desc):
             "borderWidth": 1, "borderColor": "#ffffff",
             "dataLabels": {"enabled": False}}},
         "series": [{"name": title, "colorByPoint": True, "data": data}],
+    }
+
+
+def bar_config(rows, desc):
+    """Highcharts grouped horizontal-bar config (JSON-serializable; no functions).
+
+    Two series (other-/self-directed) plotted on the source's 0%-50% axis. Like
+    the pies, the Highcharts legend and data labels are OFF: those render as SVG
+    <text> that axe-core cannot resolve a background for (false-positive contrast
+    failures). The colour->series key is the real HTML legend (`.bc-legend`);
+    values are announced on keyboard focus by the accessibility module and listed
+    in the data table. Axis text uses high-contrast ink (#1a1f29) on the white
+    figure background so the remaining SVG text is genuinely legible."""
+    cats = [r[0] for r in rows]
+    return {
+        # Solid WHITE chart background (not transparent): the bar chart must keep
+        # its axis labels (SVG <text>), and axe-core only flags those as contrast
+        # failures when it cannot resolve a background. An explicit opaque white
+        # lets axe compute the real ratio (dark ink on white ~= 15:1 -> passes).
+        "chart": {"type": "bar", "height": 96 + len(rows) * 84,
+                  "backgroundColor": "#ffffff", "style": {"fontFamily": "inherit"},
+                  "spacingBottom": 16},
+        "title": {"text": None},
+        "credits": {"enabled": False},
+        "colors": ["#1f6fb2", "#4f8a32"],
+        "accessibility": {"enabled": True, "description": desc,
+                          "point": {"valueSuffix": "%"}},
+        "legend": {"enabled": False},
+        # useHTML renders axis labels/titles as real HTML (foreignObject) instead
+        # of SVG <text>. axe-core cannot evaluate contrast on SVG text and reports
+        # false-positive failures; HTML text on the white chart background is
+        # measured correctly (dark ink ~= 15:1 -> passes).
+        "xAxis": {"categories": cats, "lineColor": "#c9ced9", "tickColor": "#c9ced9",
+                  "labels": {"useHTML": True,
+                             "style": {"color": "#1a1f29", "fontSize": "12px",
+                                       "backgroundColor": "#ffffff"}}},
+        "yAxis": {"min": 0, "max": AXIS_MAX, "tickInterval": 10,
+                  "gridLineColor": "#dbe0ea",
+                  "title": {"text": "Percent (approximate)", "useHTML": True,
+                            "style": {"color": "#3d4554", "backgroundColor": "#ffffff"}},
+                  "labels": {"format": "{value}%", "useHTML": True,
+                             "style": {"color": "#1a1f29", "fontSize": "12px",
+                                       "backgroundColor": "#ffffff"}}},
+        "tooltip": {"shared": True, "valueSuffix": "%"},
+        "plotOptions": {"bar": {"borderWidth": 0, "groupPadding": 0.12,
+                                "dataLabels": {"enabled": False}}},
+        "series": [
+            {"name": "Other-directed violence", "data": [r[1] for r in rows]},
+            {"name": "Self-directed violence", "data": [r[2] for r in rows]},
+        ],
     }
 
 
@@ -177,13 +229,20 @@ def _bar(series_class, label, value):
     )
 
 
-def bar_chart(block):
-    """CSS grouped horizontal bar chart (decorative) + collapsed data table.
+def bar_chart(block, chart_id, desc=None):
+    """One grouped bar figure with the full progressive-enhancement fallback:
 
-    The whole graphic is aria-hidden; every number is repeated as real HTML text
-    so axe-core measures contrast on HTML (not SVG), and it renders the same way
-    in the tagged PDF. The data table is the accessible source of truth.
+      1. interactive accessible Highcharts bar  (screen, only once chart-ready)
+      2. static CSS grouped bars                (default; print; JS-off)
+      3. collapsible data <table>               (always in the DOM)
+
+    The static CSS graphic is aria-hidden; every number is repeated as real HTML
+    text so axe-core measures contrast on HTML (not SVG), and it renders the same
+    way in the tagged PDF. The data table is the accessible source of truth. JS
+    adds `.chart-ready` to this figure only if Highcharts initializes, flipping
+    CSS from the static bars to the interactive chart.
     """
+    BAR_SPECS[chart_id] = bar_config(block["rows"], desc or block["title"])
     legend = (
         '<div class="bc-legend" aria-hidden="true">'
         '<span class="bc-tag"><span class="sw other"></span>Other-directed</span>'
@@ -210,10 +269,11 @@ def bar_chart(block):
         f'(DOI {esc(C.META["doi"])})</a>.</p>'
     )
     return (
-        f'<figure class="bar-card">'
+        f'<figure class="bar-card chart-figure">'
         f'<figcaption>{esc(block["title"])}</figcaption>'
         f'{legend}'
-        f'<div class="barchart" aria-hidden="true">{"".join(rows)}{axis}</div>'
+        f'<div class="bar-interactive" id="{esc(chart_id)}"></div>'
+        f'<div class="barchart bar-static" aria-hidden="true">{"".join(rows)}{axis}</div>'
         f'{details_table("Show the data table for this chart", bar_table(block))}'
         f'{note}'
         f'</figure>'
@@ -365,6 +425,13 @@ figure.bar-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
 .bc-key{display:none}
 .bc-axis{display:flex;justify-content:space-between;margin:.45rem 0 0 11.6rem;
   font-size:.75rem;color:var(--muted)}
+/* Progressive enhancement: the static CSS bars are the DEFAULT; the interactive
+   Highcharts bar is hidden until JS adds .chart-ready to the figure, then we
+   swap to the interactive chart and hide the now-redundant CSS bars. The HTML
+   colour key (.bc-legend) stays in both views. */
+.bar-interactive{display:none;background:#fff;border-radius:.4rem;overflow:hidden}
+.chart-figure.chart-ready .bar-interactive{display:block}
+.chart-figure.chart-ready .bar-static{display:none}
 
 /* Firearms callout */
 .callout{background:var(--lightblue);border:1px solid #c4ddf4;border-radius:.6rem;
@@ -441,6 +508,9 @@ footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted
   .pie-interactive{display:none!important}
   .chart-figure .pie-static{display:flex!important}
   .chart-figure ul.legend{display:grid!important}
+  /* Same for bar charts: print the static CSS bars, never the interactive layer. */
+  .bar-interactive{display:none!important}
+  .chart-figure .bar-static{display:grid!important}
 }
 """
 
@@ -539,7 +609,9 @@ def build():
     # Reasons for concern + firearms callout (bento)
     a('<section aria-labelledby="why-h"><h2 id="why-h">Why respondents were concerned</h2>')
     a('<div class="bento">')
-    a(bar_chart(C.REASONS_CONCERN))
+    a(bar_chart(C.REASONS_CONCERN, "bar-concern",
+                desc="Approximate share of respondents citing each reason for "
+                     "concern, split by other-directed and self-directed violence."))
     a(f'<aside class="callout" aria-label="Access to firearms">'
       f'<span class="big">Access to firearms</span>{esc(C.FIREARMS)}</aside>')
     a('</div></section>')
@@ -552,7 +624,9 @@ def build():
     # Reasons for inaction
     a('<section aria-labelledby="noact-h">'
       '<h2 id="noact-h">Why some respondents did not take action</h2>')
-    a(bar_chart(C.REASONS_INACTION))
+    a(bar_chart(C.REASONS_INACTION, "bar-inaction",
+                desc="Approximate share of respondents giving each reason for not "
+                     "acting, split by other-directed and self-directed violence."))
     a('</section>')
 
     # What we learned (accent panel)
@@ -596,7 +670,7 @@ def build():
     a("<script>\n"
       "(function(){\n"
       "  if(!window.Highcharts){return;}\n"
-      f"  var specs={json.dumps(PIE_SPECS)};\n"
+      f"  var specs={json.dumps({**PIE_SPECS, **BAR_SPECS})};\n"
       "  Object.keys(specs).forEach(function(id){\n"
       "    var el=document.getElementById(id);\n"
       "    if(!el){return;}\n"
