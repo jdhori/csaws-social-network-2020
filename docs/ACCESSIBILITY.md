@@ -23,21 +23,22 @@ structure tree all pass.
 > axe's uncertainty for manual review instead of hiding the element. Every piece
 > of content — including chart internals — is now scanned.
 >
-> With the cap removed, axe returns **~56 color-contrast results, every one an
+> With the cap removed, axe returns **~53 color-contrast results, every one an
 > *incomplete* (needs-review), and 0 genuine violations.** The only results this
 > affects are axe's `bgOverlap` color-contrast *incompletes* (`contrastRatio`
 > reported as `0` because axe's pixel sampler cannot resolve a background near the
 > JS-rendered Highcharts SVG/`<foreignObject>` labels): **most are chart-internal
-> label text** — the pie category + percent legend tags and the bar chart's
-> `useHTML` axis labels — **and three real HTML elements** that each happen to sit
-> directly beneath a tall, JS-rendered chart: the methodology `<p class="note">`
-> and its DOI link (below the "inaction" bar chart), and the "What we learned"
-> `<h2>` (below the action donuts). Those three were measured directly (computing
-> the WCAG ratio from their own resolved foreground/background colors):
-> **9.64 : 1, 8.41 : 1 and 10.95 : 1** — all far above the 4.5 : 1 AA threshold.
-> The trigger is purely axe's sampler failing on text positioned below a tall,
-> JS-rendered chart (the exact count shifts slightly with chart geometry); the
-> identical bar markup higher up the page (the "concern" chart) is not affected. These charts are progressive enhancement: the accessible representation
+> label text** — the pies' on-slice category + percent `dataLabels` and the bar
+> chart's `useHTML` axis labels — **and two real HTML elements** that each happen
+> to sit directly beneath a tall, JS-rendered chart: the methodology
+> `<p class="note">` and its DOI link (both below the "inaction" bar chart). Those
+> two were measured directly (computing the WCAG ratio from their own resolved
+> foreground/background colors): **9.64 : 1 and 8.41 : 1** — both far above the
+> 4.5 : 1 AA threshold. The trigger is purely axe's sampler failing on text
+> positioned below a tall, JS-rendered chart; the exact set/count shifts slightly
+> with chart geometry (e.g. the "What we learned" `<h2>` — measured at 10.95 : 1 —
+> drops in or out of the flagged set as the pies' height changes). The identical
+> bar markup higher up the page (the "concern" chart) is not affected. These charts are progressive enhancement: the accessible representation
 > is the always-present data `<table>` (shown when scripting is off and in the PDF;
 > collapsed to screen-reader-only once the interactive chart is ready, so assistive
 > technology still reads it while the infographic stays clean), and a static
@@ -61,12 +62,12 @@ structure tree all pass.
 
 | # | Issue | WCAG Criterion | Severity | Resolution |
 |---|-------|----------------|----------|------------|
-| 1 | Decorative charts could be read as data noise | 1.1.1 Non-text Content | — | The static SVGs are `aria-hidden`, each paired with a data `<table>` carrying the same numbers. On screen, once the interactive Highcharts chart is ready the table collapses to screen-reader-only (`.chart-data` → sr-only — still in the accessibility tree); with scripting off and in the PDF the full table is visible. The pie **and bar** charts are interactive accessible Highcharts (keyboard + screen-reader point announcements; pies carry a category + percent legend / "tags" under the caption) layered over the same static graphic + table fallback. |
-| 5 | Highcharts chart text + 3 HTML elements below tall charts flagged for contrast | 1.4.3 Contrast | Resolved (axe `bgOverlap` false-positive) | axe-core's pixel sampler cannot resolve a background near JS-rendered chart SVG/`<foreignObject>` labels and returns `contrastRatio: 0` with messageKey `bgOverlap` — classified by axe as *`incomplete`* (needs human review), not a violation. With the cap removed axe yields ~56 such incompletes and **0 genuine violations**: most are chart-internal label text (pie legend tags + bar axis labels) **and** three real HTML elements that each sit directly below a tall chart (methodology `<p class="note">` + DOI link under the inaction bar; the "What we learned" `<h2>` under the action donuts). Those three were measured directly at **9.64 : 1 / 8.41 : 1 / 10.95 : 1** (dark ink on light panels) — far above 4.5 : 1. Resolution: `pa11y.json` `levelCapWhenNeedsReview: "warning"` caps axe's "needs-review" results to warnings (genuine violations still error) — nothing is hidden, every element is still scanned. Every chart value also remains in the data table and is announced on keyboard focus. |
-| 7 | Pie slice colours reproduce the source's light cyan/yellow wedges | 1.4.1 Use of Color · 1.4.11 Non-text Contrast | — (decorative, by design) | For faithful reproduction the pie palettes are sampled exactly from the source PDF's own vector fills (e.g. cyan `#6ce5e8`, yellow `#ffde59`), some of which fall below 3 : 1 against white. This is defensible because the pies are **decorative** (`aria-hidden`) and backed by a real data `<table>` (every label + value); the interactive pie additionally carries a category + percent legend ("tags") under the caption, so colour is never the sole information channel. A 1.5 px white inter-slice border plus a faint outer ring keep adjacent light wedges visually separable. |
+| 1 | Decorative charts could be read as data noise | 1.1.1 Non-text Content | — | The static SVGs are `aria-hidden`, each paired with a data `<table>` carrying the same numbers. On screen, once the interactive Highcharts chart is ready the table collapses to screen-reader-only (`.chart-data` → sr-only — still in the accessibility tree); with scripting off and in the PDF the full table is visible. The pie **and bar** charts are interactive accessible Highcharts (keyboard + screen-reader point announcements; pies show category + percent as on-slice `dataLabels`) layered over the same static graphic + table fallback. |
+| 5 | Highcharts chart text + HTML elements below tall charts flagged for contrast | 1.4.3 Contrast | Resolved (axe `bgOverlap` false-positive) | axe-core's pixel sampler cannot resolve a background near JS-rendered chart SVG/`<foreignObject>` labels and returns `contrastRatio: 0` with messageKey `bgOverlap` — classified by axe as *`incomplete`* (needs human review), not a violation. With the cap removed axe yields ~53 such incompletes and **0 genuine violations**: most are chart-internal label text (pies' on-slice category + percent `dataLabels` + bar axis labels) **and** two real HTML elements that sit directly below a tall chart (methodology `<p class="note">` + DOI link under the inaction bar). Those two were measured directly at **9.64 : 1 / 8.41 : 1** (dark ink on light panels) — far above 4.5 : 1. (The "What we learned" `<h2>`, 10.95 : 1, drops in or out of the flagged set as the pies' height changes.) Resolution: `pa11y.json` `levelCapWhenNeedsReview: "warning"` caps axe's "needs-review" results to warnings (genuine violations still error) — nothing is hidden, every element is still scanned. Every chart value also remains in the data table and is announced on keyboard focus. |
+| 7 | Pie slice colours reproduce the source's light cyan/yellow wedges | 1.4.1 Use of Color · 1.4.11 Non-text Contrast | — (decorative, by design) | For faithful reproduction the pie palettes are sampled exactly from the source PDF's own vector fills (e.g. cyan `#6ce5e8`, yellow `#ffde59`), some of which fall below 3 : 1 against white. This is defensible because the pies are **decorative** (`aria-hidden`) and backed by a real data `<table>` (every label + value); the interactive pie additionally shows the category + percent as on-slice `dataLabels`, so colour is never the sole information channel. A 1.5 px white inter-slice border plus a faint outer ring keep adjacent light wedges visually separable. |
 | 6 | Decorative "1 in 5" pictogram | 1.1.1 Non-text Content | — | The five-figure pictogram is `aria-hidden`; the same ratio ("1 in 5") is stated in adjacent text, so the graphic conveys nothing the text does not. |
 | 2 | Big donut percentage initially unresolved by axe | 1.4.3 Contrast | Resolved | Number rendered as an HTML element with its own solid white background; ink-on-white ≈ 16:1. |
-| 3 | Information conveyed by chart color | 1.4.1 Use of Color | — | Color is never the only channel: every value appears as text in a data table; interactive pies carry a category + percent legend ("tags") under the caption; bar charts carry a text series key (`.bc-legend`) and label each series in text. |
+| 3 | Information conveyed by chart color | 1.4.1 Use of Color | — | Color is never the only channel: every value appears as text in a data table; interactive pies show the category + percent as on-slice `dataLabels`; bar charts carry a text series key (`.bc-legend`) and label each series in text. |
 | 4 | Hero text over a background-image | 1.4.3 Contrast | Resolved | axe-core cannot evaluate contrast over a `linear-gradient`; the hero uses a solid dark navy (`#193151`, matching the source's header band) so white text is measurable (≈ 11:1). |
 
 ### Operable

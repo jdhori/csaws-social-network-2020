@@ -82,35 +82,32 @@ def pie_config(title, rows, palette, desc):
     data = [{"name": lbl, "y": pct} for lbl, pct in rows]
     colors = [palette[i % len(palette)] for i in range(len(rows))]
     return {
-        "chart": {"type": "pie", "height": 230, "backgroundColor": "transparent",
-                  "spacingTop": 2, "spacingBottom": 2,
+        "chart": {"type": "pie", "height": 250, "backgroundColor": "transparent",
+                  "spacingTop": 4, "spacingBottom": 4,
                   "style": {"fontFamily": "inherit"}},
         "title": {"text": None},
         "credits": {"enabled": False},
         "colors": colors,
         "accessibility": {"enabled": True, "description": desc,
                           "point": {"valueSuffix": "%"}},
-        # Category + verbatim percent are shown as a wrapped legend ("tags")
-        # directly under the figcaption (verticalAlign:top), so the pie itself
-        # stays compact and centered instead of splaying connector labels out to
-        # the sides. Legend text renders as SVG <text>; axe-core cannot resolve a
-        # background for SVG text and flags it as a *contrast incomplete*
-        # (needs-review), NOT a violation. pa11y.json's levelCapWhenNeedsReview
-        # demotes those incompletes to warnings (nothing is hidden; genuine
-        # violations still error). The data <table> (always in the DOM; shown when
-        # JS is off / in print) is the accessible source of truth, and the
-        # accessibility module announces each slice value.
-        "legend": {"enabled": True, "align": "center", "verticalAlign": "top",
-                   "layout": "horizontal", "itemDistance": 14, "padding": 2,
-                   "margin": 8, "symbolRadius": 2, "symbolWidth": 10,
-                   "symbolHeight": 10,
-                   "itemStyle": {"fontSize": "11px", "fontWeight": "600",
-                                 "color": "#1a1f29"},
-                   "labelFormat": "{name}: {y}%"},
+        # No Highcharts legend: the interactive pie announces each slice's
+        # category + verbatim percent on keyboard focus (accessibility module),
+        # and the always-present data <table> (shown when JS is off / in print) is
+        # the accessible source of truth. Instead we show the on-slice category +
+        # percent dataLabels (the "visual labels"). Those render as SVG <text>;
+        # axe-core cannot resolve a background for SVG text and flags it as a
+        # *contrast incomplete* (needs-review), NOT a violation. pa11y.json's
+        # levelCapWhenNeedsReview demotes those incompletes to warnings (nothing
+        # is hidden; genuine violations still error).
+        "legend": {"enabled": False},
         "tooltip": {"pointFormat": "<b>{point.y}%</b>"},
         "plotOptions": {"pie": {
-            "borderWidth": 1, "borderColor": "#ffffff", "showInLegend": True,
-            "dataLabels": {"enabled": False}}},
+            "borderWidth": 1, "borderColor": "#ffffff", "showInLegend": False,
+            "dataLabels": {"enabled": True,
+                           "format": "{point.name}: {point.y}%",
+                           "distance": 12, "connectorWidth": 1,
+                           "style": {"fontSize": "11px", "fontWeight": "600",
+                                     "color": "#1a1f29", "textOutline": "none"}}}},
         "series": [{"name": title, "colorByPoint": True, "data": data}],
     }
 
@@ -220,11 +217,12 @@ def pct_table(caption, rows, footnote=False):
     )
 
 
-def pie_card(chart_id, title, table_caption, rows, palette, footnote=False, desc=None):
+def pie_card(chart_id, title, table_caption, rows, palette, footnote=False,
+             desc=None, chip=None):
     """One pie figure with the full progressive-enhancement fallback chain:
 
       1. interactive accessible Highcharts pie  (screen, only once chart-ready;
-         category + percent shown as a wrapped legend / "tags" under the caption)
+         category + percent shown as on-slice dataLabels, the "visual labels")
       2. static decorative SVG pie               (default; print; JS-off)
       3. data <table>                            (always in the DOM)
 
@@ -233,15 +231,24 @@ def pie_card(chart_id, title, table_caption, rows, palette, footnote=False, desc
     table to screen-reader-only (.chart-data -> sr-only; still read by AT). If JS
     is disabled or Highcharts fails, the static SVG and the full data table both
     stay visible.
+
+    `chip`, when given, renders the section's key callout (e.g. "32% friends")
+    as a single pill directly under this pie so the highlight sits with the chart
+    it summarizes.
     """
     PIE_SPECS[chart_id] = pie_config(title, rows, palette, desc or table_caption)
     svg = charts.pie_svg(rows, palette, size=200)
     table = pct_table(table_caption, rows, footnote)
+    chip_html = (
+        f'<ul class="chips" aria-label="Highlight"><li>{esc(chip)}</li></ul>'
+        if chip else ''
+    )
     return (
         f'<figure class="pie-card chart-figure">'
         f'<figcaption>{esc(title)}</figcaption>'
         f'<div class="pie-interactive" id="{esc(chart_id)}"></div>'
         f'<div class="pie-vis pie-static">{svg}</div>'
+        f'{chip_html}'
         f'<div class="chart-data">{table}</div>'
         f'</figure>'
     )
@@ -270,11 +277,6 @@ def pictogram(total=5, filled=1):
         f'viewBox="0 0 {total*30-2} 40" width="{total*30-2}" height="40" '
         f'role="presentation">{"".join(figs)}</svg>'
     )
-
-
-def callout_chips(items):
-    chips = "".join(f'<li>{esc(c)}</li>' for c in items)
-    return f'<ul class="chips" aria-label="Highlights">{chips}</ul>'
 
 
 def bar_table(block):
@@ -485,6 +487,8 @@ h3{font-size:1.02rem;color:var(--brand);margin:0 0 .5rem}
 ul.chips{list-style:none;display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem;padding:0}
 ul.chips li{background:var(--lightblue);color:var(--blue-dark);font-weight:700;
   border:1px solid #c4ddf4;border-radius:999px;padding:.3rem .8rem;font-size:.92rem}
+/* A pie card's chip carries that pie's key callout; centre it under the chart. */
+figure.pie-card ul.chips{justify-content:center;margin:.6rem 0 .2rem}
 
 /* Pie cards */
 .pie-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
@@ -495,9 +499,9 @@ figure.pie-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
 .pie{max-width:100%;height:auto}
 /* Progressive enhancement: static SVG is the DEFAULT; the interactive Highcharts
    pie is hidden until JS adds .chart-ready to the figure. Then we swap to the
-   interactive chart (which carries its category + percent legend / "tags" under
-   the caption) and hide the now-redundant static SVG. */
-.pie-interactive{display:none;min-height:230px}
+   interactive chart (which carries its category + percent labels on each slice)
+   and hide the now-redundant static SVG. */
+.pie-interactive{display:none;min-height:250px}
 .chart-figure.chart-ready .pie-interactive{display:block}
 .chart-figure.chart-ready .pie-static{display:none}
 .highcharts-credits{display:none}
@@ -710,18 +714,17 @@ def build():
     a('<section aria-labelledby="other-h">'
       '<h2 id="other-h">Persons at perceived risk of other-directed violence</h2>')
     a('<p class="section-sub">How respondents described the person they were worried about.</p>')
-    a(callout_chips(C.OTHER_CALLOUTS))
     a('<div class="pie-grid">')
     a(pie_card("pie-or-rel", "Relationship to the respondent",
                "Relationship (other-directed violence)",
-               C.OTHER_RELATIONSHIP, P.BLUE_PALETTE,
+               C.OTHER_RELATIONSHIP, P.BLUE_PALETTE, chip=C.OTHER_CALLOUTS[0],
                desc="Relationship of the person at perceived risk of other-directed "
                     "violence to the respondent."))
     a(pie_card("pie-or-gen", "Sex or gender", "Sex or gender (other-directed violence)",
-               C.OTHER_GENDER, P.BLUE_PALETTE, footnote=True,
+               C.OTHER_GENDER, P.BLUE_PALETTE, footnote=True, chip=C.OTHER_CALLOUTS[1],
                desc="Sex or gender of persons at perceived risk of other-directed violence."))
     a(pie_card("pie-or-age", "Age", "Age (other-directed violence)",
-               C.OTHER_AGE, P.BLUE_PALETTE,
+               C.OTHER_AGE, P.BLUE_PALETTE, chip=C.OTHER_CALLOUTS[2],
                desc="Age groups of persons at perceived risk of other-directed violence."))
     a('</div></section>')
 
@@ -729,18 +732,17 @@ def build():
     a('<section aria-labelledby="self-h">'
       '<h2 id="self-h">Persons at perceived risk of self-directed violence</h2>')
     a('<p class="section-sub">How respondents described the person they were worried about.</p>')
-    a(callout_chips(C.SELF_CALLOUTS))
     a('<div class="pie-grid">')
     a(pie_card("pie-sf-rel", "Relationship to the respondent",
                "Relationship (self-directed violence)",
-               C.SELF_RELATIONSHIP, P.GREEN_PALETTE,
+               C.SELF_RELATIONSHIP, P.GREEN_PALETTE, chip=C.SELF_CALLOUTS[0],
                desc="Relationship of the person at perceived risk of self-directed "
                     "violence to the respondent."))
     a(pie_card("pie-sf-gen", "Sex or gender", "Sex or gender (self-directed violence)",
-               C.SELF_GENDER, P.GREEN_PALETTE, footnote=True,
+               C.SELF_GENDER, P.GREEN_PALETTE, footnote=True, chip=C.SELF_CALLOUTS[1],
                desc="Sex or gender of persons at perceived risk of self-directed violence."))
     a(pie_card("pie-sf-age", "Age", "Age (self-directed violence)",
-               C.SELF_AGE, P.GREEN_PALETTE,
+               C.SELF_AGE, P.GREEN_PALETTE, chip=C.SELF_CALLOUTS[2],
                desc="Age groups of persons at perceived risk of self-directed violence."))
     a('</div></section>')
 
