@@ -82,30 +82,35 @@ def pie_config(title, rows, palette, desc):
     data = [{"name": lbl, "y": pct} for lbl, pct in rows]
     colors = [palette[i % len(palette)] for i in range(len(rows))]
     return {
-        "chart": {"type": "pie", "height": 240, "backgroundColor": "transparent",
+        "chart": {"type": "pie", "height": 230, "backgroundColor": "transparent",
+                  "spacingTop": 2, "spacingBottom": 2,
                   "style": {"fontFamily": "inherit"}},
         "title": {"text": None},
         "credits": {"enabled": False},
         "colors": colors,
         "accessibility": {"enabled": True, "description": desc,
                           "point": {"valueSuffix": "%"}},
-        # On-slice data labels (category + verbatim percent) make the interactive
-        # pie self-describing -- the infographic look the source uses. These render
-        # as SVG <text>; axe-core cannot resolve a background for SVG text and flags
-        # it as a *contrast incomplete* (needs-review), NOT a violation. pa11y.json's
-        # levelCapWhenNeedsReview demotes those incompletes to warnings (nothing is
-        # hidden from the scan; genuine violations still error). The data <table>
-        # (always in the DOM; shown when JS is off / in print) is the accessible
-        # source of truth, and the accessibility module announces each slice value.
-        "legend": {"enabled": False},
+        # Category + verbatim percent are shown as a wrapped legend ("tags")
+        # directly under the figcaption (verticalAlign:top), so the pie itself
+        # stays compact and centered instead of splaying connector labels out to
+        # the sides. Legend text renders as SVG <text>; axe-core cannot resolve a
+        # background for SVG text and flags it as a *contrast incomplete*
+        # (needs-review), NOT a violation. pa11y.json's levelCapWhenNeedsReview
+        # demotes those incompletes to warnings (nothing is hidden; genuine
+        # violations still error). The data <table> (always in the DOM; shown when
+        # JS is off / in print) is the accessible source of truth, and the
+        # accessibility module announces each slice value.
+        "legend": {"enabled": True, "align": "center", "verticalAlign": "top",
+                   "layout": "horizontal", "itemDistance": 14, "padding": 2,
+                   "margin": 8, "symbolRadius": 2, "symbolWidth": 10,
+                   "symbolHeight": 10,
+                   "itemStyle": {"fontSize": "11px", "fontWeight": "600",
+                                 "color": "#1a1f29"},
+                   "labelFormat": "{name}: {y}%"},
         "tooltip": {"pointFormat": "<b>{point.y}%</b>"},
         "plotOptions": {"pie": {
-            "borderWidth": 1, "borderColor": "#ffffff",
-            "dataLabels": {"enabled": True,
-                           "format": "{point.name}: {point.y}%",
-                           "distance": 14, "connectorWidth": 1,
-                           "style": {"fontSize": "11px", "fontWeight": "600",
-                                     "color": "#1a1f29", "textOutline": "none"}}}},
+            "borderWidth": 1, "borderColor": "#ffffff", "showInLegend": True,
+            "dataLabels": {"enabled": False}}},
         "series": [{"name": title, "colorByPoint": True, "data": data}],
     }
 
@@ -219,7 +224,7 @@ def pie_card(chart_id, title, table_caption, rows, palette, footnote=False, desc
     """One pie figure with the full progressive-enhancement fallback chain:
 
       1. interactive accessible Highcharts pie  (screen, only once chart-ready;
-         draws on-slice category + percent labels -- the infographic look)
+         category + percent shown as a wrapped legend / "tags" under the caption)
       2. static decorative SVG pie               (default; print; JS-off)
       3. data <table>                            (always in the DOM)
 
@@ -490,9 +495,9 @@ figure.pie-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
 .pie{max-width:100%;height:auto}
 /* Progressive enhancement: static SVG is the DEFAULT; the interactive Highcharts
    pie is hidden until JS adds .chart-ready to the figure. Then we swap to the
-   interactive chart (which draws its own on-slice category + percent labels) and
-   hide the now-redundant static SVG. */
-.pie-interactive{display:none;min-height:240px}
+   interactive chart (which carries its category + percent legend / "tags" under
+   the caption) and hide the now-redundant static SVG. */
+.pie-interactive{display:none;min-height:230px}
 .chart-figure.chart-ready .pie-interactive{display:block}
 .chart-figure.chart-ready .pie-static{display:none}
 .highcharts-credits{display:none}
