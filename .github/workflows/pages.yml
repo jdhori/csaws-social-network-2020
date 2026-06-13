@@ -26,12 +26,16 @@ jobs:
 
       - name: Assemble static site
         run: |
-          mkdir -p _site
-          # Self-contained accessible HTML becomes the landing page
-          cp document/CSaWS_SocialNetwork.html _site/index.html
-          # Make the Markdown and tagged PDF/UA-1 downloadable alongside it
-          cp document/CSaWS_SocialNetwork.md _site/ 2>/dev/null || true
-          cp document/CSaWS_SocialNetwork_accessible.pdf _site/ 2>/dev/null || true
+          mkdir -p _site/document _site/docs
+          # Accessible landing page (links to all three formats) is the index
+          cp index.html _site/index.html
+          # Publish the three deliverables under /document, matching the repo layout
+          cp document/CSaWS_SocialNetwork.html _site/document/
+          cp document/CSaWS_SocialNetwork.md _site/document/
+          cp document/CSaWS_SocialNetwork_accessible.pdf _site/document/
+          # Supporting docs linked from the landing page
+          cp docs/ACCESSIBILITY.md _site/docs/ 2>/dev/null || true
+          cp NOTICE.md _site/ 2>/dev/null || true
 
       - name: Configure Pages
         uses: actions/configure-pages@v6
