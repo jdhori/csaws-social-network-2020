@@ -34,9 +34,10 @@ AXIS_MAX = 50
 # and emitted in a single init script; the static SVG/CSS graphic and the data
 # table remain the default/fallback (and the only thing the tagged PDF uses,
 # since WeasyPrint runs no JavaScript). PIE_SPECS holds the pies; BAR_SPECS the
-# grouped bar charts.
+# grouped bar charts; DONUT_SPECS the single-stat donuts.
 PIE_SPECS = {}
 BAR_SPECS = {}
+DONUT_SPECS = {}
 
 
 def read_lib(name):
@@ -118,6 +119,36 @@ def bar_config(rows, desc):
             {"name": "Other-directed violence", "data": [r[1] for r in rows]},
             {"name": "Self-directed violence", "data": [r[2] for r in rows]},
         ],
+    }
+
+
+def donut_config(percent, color, desc):
+    """Highcharts two-slice donut for a single stat (text-free, like the pies).
+
+    The coloured slice is the percentage; the remainder is a light track. No data
+    labels / legend / SVG text (axe-core can't resolve a background for chart text
+    -- see the bar-chart note). The readable value is the HTML `.donut-num` centre
+    chip + the adjacent `<p>`; the accessibility module announces it on focus. The
+    76% innerSize keeps the hole radius (~61px on a 160px donut) larger than the
+    centre chip's square bounding-box corners so the chip never exposes the ring."""
+    track = "#e3e7ef"
+    return {
+        "chart": {"type": "pie", "height": 160, "width": 160, "margin": [0, 0, 0, 0],
+                  "backgroundColor": "transparent", "style": {"fontFamily": "inherit"}},
+        "title": {"text": None},
+        "credits": {"enabled": False},
+        "accessibility": {"enabled": True, "description": desc,
+                          "point": {"valueSuffix": "%"}},
+        "legend": {"enabled": False},
+        "tooltip": {"pointFormat": "<b>{point.y}%</b>"},
+        "plotOptions": {"pie": {
+            "innerSize": "76%", "borderWidth": 0,
+            "dataLabels": {"enabled": False},
+            "states": {"inactive": {"opacity": 1}}}},
+        "series": [{"name": "Share", "data": [
+            {"name": "Took this action", "y": percent, "color": color},
+            {"name": "Did not", "y": 100 - percent, "color": track},
+        ]}],
     }
 
 
@@ -280,14 +311,25 @@ def bar_chart(block, chart_id, desc=None):
     )
 
 
-def donut_pair(items, color):
+def donut_pair(items, color, id_base="donut"):
+    """Single-stat donuts with the full progressive-enhancement fallback chain:
+
+      1. interactive accessible Highcharts donut  (screen, only once chart-ready)
+      2. static decorative SVG donut               (default; print; JS-off)
+      3. the value as real HTML text               (centre chip + adjacent <p>)
+
+    Same `.chart-figure` / `.chart-ready` swap the pies and bars use."""
     cards = []
-    for it in items:
+    for i, it in enumerate(items):
         n = int(it["percent"].rstrip("%"))
+        cid = f"{id_base}-{i}"
+        DONUT_SPECS[cid] = donut_config(
+            n, color, f'{it["percent"]} of respondents {it["text"]}')
         cards.append(
-            f'<div class="donut-card">'
+            f'<div class="donut-card chart-figure">'
             f'<div class="donut-wrap">'
-            f'{charts.stat_donut_svg(n, color, label=False)}'
+            f'<div class="donut-interactive" id="{esc(cid)}"></div>'
+            f'<div class="donut-static">{charts.stat_donut_svg(n, color, label=False)}</div>'
             f'<span class="donut-num" aria-hidden="true">{esc(it["percent"])}</span>'
             f'</div>'
             f'<p><span class="sr-only">{esc(it["percent"])}: </span>{esc(it["text"])}</p>'
@@ -443,6 +485,13 @@ figure.bar-card figcaption{font-weight:700;color:var(--brand);margin-bottom:.5re
 .donut-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
 .donut-card{background:var(--panel);border-radius:.6rem;padding:1.2rem;text-align:center}
 .donut-wrap{position:relative;width:160px;height:160px;margin:0 auto .6rem}
+/* Interactive Highcharts donut + static SVG occupy the same 160x160 box; the
+   number chip overlays both. Progressive enhancement: the static SVG is the
+   default until JS adds .chart-ready, then the interactive donut takes over. */
+.donut-interactive,.donut-static{position:absolute;inset:0;width:160px;height:160px}
+.donut-interactive{display:none}
+.chart-figure.chart-ready .donut-interactive{display:block}
+.chart-figure.chart-ready .donut-static{display:none}
 /* Own solid white background so axe-core computes contrast directly; kept small
    (5rem chip) so its square bounding box stays inside the SVG's white hole. */
 .donut-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -511,6 +560,9 @@ footer.brief{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted
   /* Same for bar charts: print the static CSS bars, never the interactive layer. */
   .bar-interactive{display:none!important}
   .chart-figure .bar-static{display:grid!important}
+  /* And donuts: print the static SVG, never the interactive Highcharts layer. */
+  .donut-interactive{display:none!important}
+  .chart-figure .donut-static{display:block!important}
 }
 """
 
@@ -525,7 +577,7 @@ CSP = ("default-src 'none'; img-src data:; style-src 'unsafe-inline'; "
 def build():
     m = C.META
     P = charts
-    PIE_SPECS.clear()
+    PIE_SPECS.clear(); BAR_SPECS.clear(); DONUT_SPECS.clear()
     head = f"""<!doctype html>
 <html lang="{esc(m['lang'])}">
 <head>
@@ -618,7 +670,7 @@ def build():
 
     # Actions taken (donuts)
     a('<section aria-labelledby="act-h"><h2 id="act-h">Actions taken to reduce risk</h2>')
-    a(donut_pair(C.ACTION_TAKEN, P.BLUE))
+    a(donut_pair(C.ACTION_TAKEN, P.BLUE, id_base="donut-act"))
     a('</section>')
 
     # Reasons for inaction
@@ -670,7 +722,7 @@ def build():
     a("<script>\n"
       "(function(){\n"
       "  if(!window.Highcharts){return;}\n"
-      f"  var specs={json.dumps({**PIE_SPECS, **BAR_SPECS})};\n"
+      f"  var specs={json.dumps({**PIE_SPECS, **BAR_SPECS, **DONUT_SPECS})};\n"
       "  Object.keys(specs).forEach(function(id){\n"
       "    var el=document.getElementById(id);\n"
       "    if(!el){return;}\n"

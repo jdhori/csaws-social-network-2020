@@ -1,6 +1,6 @@
 {
   "standard": "WCAG2AA",
   "runners": ["axe", "htmlcs"],
-  "hideElements": ".pie-interactive svg, .bar-interactive svg",
+  "hideElements": ".pie-interactive svg, .bar-interactive svg, .donut-interactive svg",
   "_rationale": "hideElements excludes the DECORATIVE, JS-only Highcharts SVGs from the scan. axe-core cannot evaluate color contrast for text rendered inside an SVG/foreignObject and reports false-positive failures even for text demonstrably at ~15:1 (verified with an explicit opaque white label background). These charts are progressive enhancement: the accessible representation is the always-present data <table>, and a static graphic renders when scripting is off. Excluding the chart-internal SVG keeps every piece of REAL page content under the contrast gate. See docs/ACCESSIBILITY.md. Note: chromeLaunchConfig (executablePath / --no-sandbox) is environment-specific and supplied at runtime, e.g. --config of a local file that merges this one."
 }
